@@ -1,0 +1,147 @@
+@font-face {
+  font-family: "Rocher";
+  src: url(https://assets.codepen.io/9632/RocherColorGX.woff2);
+}
+body {
+  background: linear-gradient(
+    285.51deg,
+    rgba(21, 42, 82, 0.9),
+    rgba(18, 32, 61, 0.8) 67.45%
+  );
+}
+
+.font-game {
+  font-family: "Rocher" !important;
+}
+.text-center {
+  text-align: center;
+}
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  color: white;
+}
+
+.grid {
+  display: grid;
+  width: 100%;
+  margin-bottom: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 10px;
+}
+.box-card {
+  padding: 30px;
+  width: calc(100% - 60px);
+  min-height: calc(275px);
+  background-color: rgb(42, 53, 87);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  position: relative;
+  cursor: pointer;
+  box-shadow: rgb(0 0 0 / 20%) 0px 4px 6px -1px,
+    rgb(0 0 0 / 6%) 0px 2px 4px -1px;
+  transition: all 0.3s ease-out 0s;
+}
+
+.box-card__img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.box-contributor {
+  position: relative;
+  color: white;
+  margin: 0 auto;
+  /* background-color: rgb(19, 32, 61); */
+  background-color: rgb(19, 32, 61);
+
+  margin-top: -30px;
+  border-radius: 10px;
+  padding: 40px 30px;
+  width: calc(280px);
+  height: calc(490px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  justify-content: center;
+  box-shadow: rgb(0 0 0 / 10%) 0px 0px 3px 0px, rgb(0 0 0 / 6%) 0px 0px 2px 0px;
+  z-index: 222;
+}
+
+.d-flex {
+  display: flex;
+  align-items: center;
+}
+.box-vault-flex {
+  display: flex;
+  align-items: flex-start;
+}
+
+.box-vault {
+  position: absolute;
+  left: 0;
+  top: 10%;
+  width: 234px;
+  opacity: 0;
+  background-color: rgb(19, 32, 61);
+  transition: all 0.4s ease 0s;
+}
+
+.box-vault.open {
+  opacity: 1;
+  left: 100%;
+}
+
+.vault-tab {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.vault-tab.active {
+  background: rgb(28, 40, 71);
+  color: #fff;
+}
+
+.vault-content {
+  background: rgb(28, 40, 71);
+  padding: 10px;
+  margin: 0 10px 10px 0px;
+  border-radius: 3px;
+}
+
+.vault-transform {
+  position: absolute;
+  top: 10%;
+  left: calc(100%);
+  background-color: rgb(19, 32, 61);
+  padding: 15px 12px;
+  transition: left 0.5s;
+  cursor: pointer;
+}
+
+.vault-transform.open {
+  left: calc(100% + 234px);
+}
+
+.vault-transform__img {
+  transform: rotate(266deg);
+}
+
+.vault-transform__img.open {
+  transform: rotate(90deg);
+}
