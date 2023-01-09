@@ -28,11 +28,13 @@ a {
 }
 
 .grid {
-  display: grid;
+  width: 350px;
+  margin: 0 auto;
+  /* display: grid;
   width: 100%;
   margin-bottom: 20px;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  gap: 30px; */
   margin-top: 10px;
 }
 .box-card {

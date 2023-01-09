@@ -8,6 +8,6 @@ export declare global {
       privateCode: string
     ) => void;
     joinRoom: (roomID: number) => void;
-    getCurrentSession: () => void;
+    getCurrentSession: () => string;
   }
 }

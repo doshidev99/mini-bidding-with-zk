@@ -10,6 +10,8 @@ import AppHeader from "../components/AppHeader";
 import "../styles/cat.scss";
 import "../styles/global.css";
 import { chains, client } from "../wagmi";
+import { ThemeProvider } from "@mui/material";
+import darkTheme from "../theme/darkTheme";
 
 function App({ Component, pageProps }: AppProps) {
   const [mounted, setMounted] = useState(false);
@@ -54,12 +56,14 @@ function App({ Component, pageProps }: AppProps) {
           <script src={"/static/wasm_exec.js"} type="text/javascript" />
           <title>My wagmi + RainbowKit App</title>
         </NextHead>
-        {mounted && (
-          <>
-            <AppHeader />
-            <Component {...pageProps} />
-          </>
-        )}
+        <ThemeProvider theme={darkTheme}>
+          {mounted && (
+            <>
+              <AppHeader />
+              <Component {...pageProps} />
+            </>
+          )}
+        </ThemeProvider>
         <Toaster />
       </RainbowKitProvider>
     </WagmiConfig>
