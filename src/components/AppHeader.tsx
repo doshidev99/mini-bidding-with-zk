@@ -1,3 +1,4 @@
+import { handleLogout } from "@api/axiosClient";
 import {
   Avatar,
   Box,
@@ -80,7 +81,7 @@ const AppHeader = () => {
               onClose={handleCloseUserMenu}
             >
               <MenuItem>
-                <Typography onClick={authService.logout} textAlign="center">
+                <Typography onClick={handleLogout} textAlign="center">
                   Logout
                 </Typography>
               </MenuItem>

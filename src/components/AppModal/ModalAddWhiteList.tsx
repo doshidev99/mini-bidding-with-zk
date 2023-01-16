@@ -75,10 +75,12 @@ const ModalAddWhiteList = ({ open, toggle }) => {
     setValue("roomId", value);
   };
 
-  const optionRoomList = roomList?.map((room) => ({
-    value: room.id,
-    label: room.name,
-  }));
+  const optionRoomList = roomList
+    .filter((r) => r.tree_id == 0)
+    ?.map((room) => ({
+      value: room.id,
+      label: room.name,
+    }));
 
   if (isLoading) return <CircularProgress />;
 
@@ -154,7 +156,7 @@ const ModalAddWhiteList = ({ open, toggle }) => {
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >
-              Update whitelist
+              Add to whitelist
             </Button>
           </Box>
         </Box>

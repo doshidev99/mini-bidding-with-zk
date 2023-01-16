@@ -52,22 +52,6 @@ const getInstance = (baseURL: string) => {
       return response.data;
     },
     async function (error) {
-      const { status } = error.response;
-      if (status === 401) {
-        let originalRequest = error.config;
-        if (isRefreshing) {
-          return new Promise(function (resolve, reject) {
-            failedQueue.push({ resolve, reject });
-          })
-            .then((token) => {
-              originalRequest.headers["Authorization"] = "Bearer " + token;
-              return instance(originalRequest);
-            })
-            .catch((err) => {
-              return Promise.reject(err);
-            });
-        }
-      }
       return Promise.reject(error.response?.data);
     }
   );
