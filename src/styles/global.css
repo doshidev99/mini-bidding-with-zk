@@ -30,11 +30,11 @@ a {
 .grid {
   width: 350px;
   margin: 0 auto;
-  /* display: grid;
+  display: grid;
   width: 100%;
   margin-bottom: 20px;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px; */
+  gap: 30px;
   margin-top: 10px;
 }
 .box-card {
@@ -146,4 +146,14 @@ a {
 
 .vault-transform__img.open {
   transform: rotate(90deg);
+}
+
+.login-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.icon {
+  height: 100%;
+  margin-right: 0.5rem;
 }

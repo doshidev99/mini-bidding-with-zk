@@ -1,19 +1,31 @@
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
-import type { AppProps } from "next/app";
 import NextHead from "next/head";
 import { Toaster } from "react-hot-toast";
 import { WagmiConfig } from "wagmi";
 
+import AuthGuard from "@guards/AuthGuard";
+import NoAuthGuard from "@guards/NoGuard";
+import { Container, ThemeProvider } from "@mui/material";
+import { ERole } from "@utils/constants";
 import { useEffect, useState } from "react";
-import AppHeader from "../components/AppHeader";
 import "../styles/cat.scss";
 import "../styles/global.css";
-import { chains, client } from "../wagmi";
-import { ThemeProvider } from "@mui/material";
 import darkTheme from "../theme/darkTheme";
+import { chains, client } from "../wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }) {
+  const Guard = (() => {
+    const currentRole = Component.role || null;
+    switch (true) {
+      case currentRole === ERole.NO_AUTH:
+        return NoAuthGuard;
+      default:
+        return AuthGuard;
+    }
+  })();
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -21,7 +33,7 @@ function App({ Component, pageProps }: AppProps) {
     // @ts-ignore
     const go = new window["Go"]();
     window.WebAssembly.instantiateStreaming(
-      fetch("/static/main.wasm", {
+      fetch("/static/json.wasm", {
         headers: {
           "Content-Type": "application/wasm",
         },
@@ -48,24 +60,29 @@ function App({ Component, pageProps }: AppProps) {
     });
   });
 
+  const AppContent = (
+    <Guard>
+      <Container>
+        <Component {...pageProps} />
+      </Container>
+    </Guard>
+  );
+
   return (
     <WagmiConfig client={client}>
-      <RainbowKitProvider chains={chains}>
-        <NextHead>
-          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-          <script src={"/static/wasm_exec.js"} type="text/javascript" />
-          <title>My wagmi + RainbowKit App</title>
-        </NextHead>
-        <ThemeProvider theme={darkTheme}>
-          {mounted && (
-            <>
-              <AppHeader />
-              <Component {...pageProps} />
-            </>
-          )}
-        </ThemeProvider>
-        <Toaster />
-      </RainbowKitProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <RainbowKitProvider chains={chains}>
+          <NextHead>
+            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+            <script src={"/static/wasm_exec.js"} type="text/javascript" />
+            <title>My wagmi + RainbowKit App</title>
+          </NextHead>
+          <ThemeProvider theme={darkTheme}>
+            {mounted && <>{AppContent}</>}
+          </ThemeProvider>
+          <Toaster />
+        </RainbowKitProvider>
+      </QueryClientProvider>
     </WagmiConfig>
   );
 }
