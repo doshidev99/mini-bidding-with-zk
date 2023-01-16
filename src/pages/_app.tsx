@@ -29,36 +29,36 @@ function App({ Component, pageProps }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  useEffect(() => {
-    // @ts-ignore
-    const go = new window["Go"]();
-    window.WebAssembly.instantiateStreaming(
-      fetch("/static/json.wasm", {
-        headers: {
-          "Content-Type": "application/wasm",
-        },
-      }),
-      go.importObject
-    ).then((result) => {
-      go.run(result.instance);
+  // useEffect(() => {
+  //   // @ts-ignore
+  //   const go = new window["Go"]();
+  //   window.WebAssembly.instantiateStreaming(
+  //     fetch("/static/json.wasm", {
+  //       headers: {
+  //         "Content-Type": "application/wasm",
+  //       },
+  //     }),
+  //     go.importObject
+  //   ).then((result) => {
+  //     go.run(result.instance);
 
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register("/sw.js").then(
-            function (registration) {
-              console.log(
-                "Service Worker registration successful with scope: ",
-                registration.scope
-              );
-            },
-            function (err) {
-              console.log("Service Worker registration failed: ", err);
-            }
-          );
-        });
-      }
-    });
-  });
+  //     if ("serviceWorker" in navigator) {
+  //       window.addEventListener("load", function () {
+  //         navigator.serviceWorker.register("/sw.js").then(
+  //           function (registration) {
+  //             console.log(
+  //               "Service Worker registration successful with scope: ",
+  //               registration.scope
+  //             );
+  //           },
+  //           function (err) {
+  //             console.log("Service Worker registration failed: ", err);
+  //           }
+  //         );
+  //       });
+  //     }
+  //   });
+  // });
 
   const AppContent = (
     <Guard>

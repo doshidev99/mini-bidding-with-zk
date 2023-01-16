@@ -8,6 +8,7 @@ import {
   Modal,
   Typography,
 } from "@mui/material";
+import { Router, useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -20,7 +21,7 @@ const schema = yup.object().shape({
 
 const ModalJoinRoom = ({ open, toggle, roomId }) => {
   const [joining, onJoining] = useState(false);
-
+  const router = useRouter();
   const {
     handleSubmit,
     control,
@@ -47,6 +48,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
       };
       const _data = await zkApi.joinRoom(_payload);
       toast.success("Join room successfully");
+      router.push(`/rooms/${roomId}`);
       console.log({ _data });
     } catch (e) {
     } finally {
@@ -59,7 +61,8 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
         <Box>
           <Box sx={style}>
             <Typography variant="subtitle1">
-              Please enter private code to join the room
+              Please enter private code to join the room:
+              {roomId}
             </Typography>
             <BamInput
               control={control}

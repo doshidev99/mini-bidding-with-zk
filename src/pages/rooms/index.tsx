@@ -24,7 +24,7 @@ const schema = yup.object().shape({
   email: yup.string().required(),
 });
 
-const App = () => {
+const Rooms = () => {
   const { data: roomList, isLoading } = useRoomService();
   const [open, toggle] = useToggle();
   const [currentRoomId, setCurrentRoomId] = useState();
@@ -131,4 +131,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Rooms;

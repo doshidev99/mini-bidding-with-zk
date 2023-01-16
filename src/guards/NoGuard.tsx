@@ -9,7 +9,7 @@ const NoAuthGuard = ({ children }) => {
     if (router.pathname === "/verify-email") {
     } else {
       if (authService.isAuthenticated()) {
-        router.replace("/home");
+        // router.replace("/home");
       }
     }
   }, []);
