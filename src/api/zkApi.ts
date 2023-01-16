@@ -18,4 +18,13 @@ export const zkApi = {
     const res = await axiosInstance.post("/join-room", payload);
     return res;
   },
+
+  async importWhiteList(payload: {
+    contents: Array<{ user: string; code: string }>;
+    name: string;
+    room: number;
+  }): Promise<any> {
+    const res = await axiosInstance.post("/merkle-room", payload);
+    return res;
+  },
 };

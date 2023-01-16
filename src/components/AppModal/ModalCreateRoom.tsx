@@ -6,8 +6,9 @@ import { useToggle } from "@hooks/useToggle";
 import { Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { randomInfo } from "@utils/generatorData";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
@@ -20,7 +21,7 @@ const schema = yup.object().shape({
 });
 
 const ModalCreateRoom = ({ open, toggle }) => {
-  const [submitting, onSubmitting] = useToggle();
+  const [submitting, onSubmitting] = useState(false);
 
   const {
     handleSubmit,
@@ -49,12 +50,15 @@ const ModalCreateRoom = ({ open, toggle }) => {
 
   const onSubmit = async (formValues) => {
     try {
-      onSubmitting();
+      onSubmitting(true);
       const payload = formValues;
       const _data = await zkApi.createRoom(payload);
       console.log({ _data });
-      onSubmitting();
-    } catch (e) {}
+      toast.success("Create room successfully");
+    } catch (e) {
+    } finally {
+      onSubmitting(false);
+    }
   };
 
   return (
