@@ -9,14 +9,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
-import BigNumber from "bignumber.js";
-import { parse, stringify } from "lossless-json";
-import { Router, useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as yup from "yup";
-import JSONbig from "json-bigint";
 
 const schema = yup.object().shape({
   code: yup.string().required(),
@@ -35,6 +32,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
   } = useForm<{
     code: string;
     email: string;
+    bidValue: number;
   }>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -46,13 +44,19 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
 
   const onSubmit = (formValues) => {
     onJoining(true);
-    const _payload = {
+    const payload = {
       room_id: roomId,
       email: formValues.email,
-      bid_value: 123,
       private_code: formValues.code,
     };
-    Promise.all([zkApi.joinRoom(_payload), zkApi.joinBidding(_payload)])
+
+    Promise.all([
+      zkApi.joinRoom(payload),
+      zkApi.joinBidding({
+        ...payload,
+        bid_value: formValues.bidValue,
+      }),
+    ])
       .then(([proofId, bid_data]) => {
         updateProofId(proofId);
         updateBidData(bid_data);
@@ -84,6 +88,15 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
               autoFocus={true}
             />
 
+            <BamInput
+              control={control}
+              label="Value bid"
+              name="bidValue"
+              placeholder="Enter your value bid"
+              rules={{ required: true }}
+              error={errors.bidValue}
+              autoFocus={true}
+            />
             <BamInput
               control={control}
               label="Code"

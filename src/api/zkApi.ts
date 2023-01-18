@@ -10,6 +10,19 @@ export const zkApi = {
     return res;
   },
 
+  async openRoom(payload: {
+    start_after: number;
+    room_id: number;
+  }): Promise<any> {
+    const res = await axiosInstance.post("/room/open", payload);
+    return res;
+  },
+
+  async closeRoom(payload: { room_id: number }): Promise<any> {
+    const res = await axiosInstance.post("/room/close", payload);
+    return res;
+  },
+
   async joinRoom(payload: {
     room_id: string;
     email: string;
@@ -33,6 +46,7 @@ export const zkApi = {
     email: string;
     private_code: string;
     room_id: number;
+    bid_value: number;
   }): Promise<any> {
     const res = await axiosInstance.post("/bidding/join", payload);
     return res;
