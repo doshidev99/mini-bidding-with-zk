@@ -26,6 +26,7 @@ const processQueue = (error: any, token = null) => {
 export const handleLogout = () => {
   const authService = new AuthService();
   authService.logout();
+  
 };
 
 const getInstance = (baseURL: string) => {

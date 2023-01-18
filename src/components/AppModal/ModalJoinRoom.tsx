@@ -8,11 +8,15 @@ import {
   Modal,
   Typography,
 } from "@mui/material";
+import { useStoreDataRoom } from "@store/useStoreDataRoom";
+import BigNumber from "bignumber.js";
+import { parse, stringify } from "lossless-json";
 import { Router, useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as yup from "yup";
+import JSONbig from "json-bigint";
 
 const schema = yup.object().shape({
   code: yup.string().required(),
@@ -22,6 +26,8 @@ const schema = yup.object().shape({
 const ModalJoinRoom = ({ open, toggle, roomId }) => {
   const [joining, onJoining] = useState(false);
   const router = useRouter();
+  const { updateProofId, updateBidData } = useStoreDataRoom();
+
   const {
     handleSubmit,
     control,
@@ -38,22 +44,26 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
     mode: "onChange",
   });
 
-  const onSubmit = async (formValues) => {
-    try {
-      onJoining(true);
-      const _payload = {
-        room_id: roomId,
-        email: formValues.email,
-        private_code: formValues.code,
-      };
-      const _data = await zkApi.joinRoom(_payload);
-      toast.success("Join room successfully");
-      router.push(`/rooms/${roomId}`);
-      console.log({ _data });
-    } catch (e) {
-    } finally {
-      onJoining(false);
-    }
+  const onSubmit = (formValues) => {
+    onJoining(true);
+    const _payload = {
+      room_id: roomId,
+      email: formValues.email,
+      bid_value: 123,
+      private_code: formValues.code,
+    };
+    Promise.all([zkApi.joinRoom(_payload), zkApi.joinBidding(_payload)])
+      .then(([proofId, bid_data]) => {
+        updateProofId(proofId);
+        updateBidData(bid_data);
+        toast.success("Join room successfully");
+        router.push(`/rooms/${roomId}`);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          onJoining(false);
+        }, 2000);
+      });
   };
   return (
     <div>

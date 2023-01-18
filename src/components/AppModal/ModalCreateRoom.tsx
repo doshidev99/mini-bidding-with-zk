@@ -51,10 +51,16 @@ const ModalCreateRoom = ({ open, toggle }) => {
   const onSubmit = async (formValues) => {
     try {
       onSubmitting(true);
-      const payload = formValues;
+      const payload = {
+        ...formValues,
+        visibility: "private",
+        bid_type: "only_once",
+        duration_time: 30,
+      };
       const _data = await zkApi.createRoom(payload);
       console.log({ _data });
       toast.success("Create room successfully");
+      toggle();
     } catch (e) {
     } finally {
       onSubmitting(false);

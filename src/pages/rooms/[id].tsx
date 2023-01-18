@@ -1,20 +1,21 @@
+import { zkApi } from "@api/zkApi";
 import AppModalDetail from "@components/AppModalDetail";
 import { useToggle } from "@hooks/useToggle";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
+import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 
 const RoomDetail = () => {
+  const { query } = useRouter();
   const [currentTab, setCurrentTab] = useState(1);
   const [isOpen, onOpen] = useToggle();
   const [openModal, toggleModal] = useToggle();
+  const { bid_data, proof_id } = useStoreDataRoom();
 
-  const workerRef = useRef();
-  // useEffect(() => {
-  //   if (workerRef.current === undefined) {
-  //     workerRef.current = new Worker(new URL("/public/sw.js", import.meta.url));
-  //   }
-  // }, []);
+  console.log(bid_data, "bid_data");
+  console.log(proof_id, "proof_id");
 
   const renderComponent = () => {
     switch (currentTab) {
@@ -31,6 +32,17 @@ const RoomDetail = () => {
           </Box>
         );
     }
+  };
+
+  const onBidding = async () => {
+    const payload = {
+      room_id: +query.id,
+      proof_id,
+      bid_data,
+    };
+
+    const data = await zkApi.bidding(payload);
+    console.log(data);
   };
   return (
     <div className="container">
@@ -108,18 +120,11 @@ const RoomDetail = () => {
               height={200}
             />
           </div>
-
-          <Typography
-            onClick={toggleModal}
-            variant="subtitle1"
-            textAlign={"center"}
-            style={{
-              textDecoration: "underline",
-              cursor: "pointer",
-            }}
-          >
-            Badge detail
-          </Typography>
+          <Box pb={2} textAlign="center">
+            <Button variant="outlined" onClick={onBidding}>
+              Bidding
+            </Button>
+          </Box>
           <div className="text-center">ENS Supporter ZK Badge</div>
         </div>
       </div>

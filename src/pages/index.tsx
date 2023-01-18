@@ -120,7 +120,7 @@ const App = () => {
         })}
       </div>
 
-      {roomList.length == 0 && (
+      {roomList?.length == 0 && (
         <Typography textAlign={"center"} color="secondary ">
           Not have room this time
         </Typography>
