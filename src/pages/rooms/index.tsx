@@ -6,8 +6,10 @@ import BamInput from "@components/Form/BamInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToggle } from "@hooks/useToggle";
 import {
+  Badge,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Modal,
   Skeleton,
@@ -63,6 +65,12 @@ const Rooms = () => {
                     {room.id}
                     <br />
                   </div>
+                  <Box>
+                    <Chip
+                      label={room.status}
+                      color={`${room.id == "ready" ? "success" : "primary"}`}
+                    />
+                  </Box>
                 </div>
                 <div className="box-card__img">
                   <Image

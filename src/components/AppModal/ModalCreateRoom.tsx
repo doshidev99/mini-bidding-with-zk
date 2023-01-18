@@ -58,7 +58,6 @@ const ModalCreateRoom = ({ open, toggle }) => {
         duration_time: 30,
       };
       const _data = await zkApi.createRoom(payload);
-      console.log({ _data });
       toast.success("Create room successfully");
       toggle();
     } catch (e) {
