@@ -1,22 +1,12 @@
-import { zkApi } from "@api/zkApi";
 import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
 import ModalCreateRoom from "@components/AppModal/ModalCreateRoom";
 import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
-import BamInput from "@components/Form/BamInput";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useToggle } from "@hooks/useToggle";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Modal,
-  Skeleton,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, Skeleton, Typography } from "@mui/material";
 import { useRoomService } from "@services/roomService";
 import Image from "next/image";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import Countdown from "react-countdown";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
@@ -36,6 +26,7 @@ const App = () => {
       <div className="grid">
         <Skeleton height={600} />
         <Skeleton height={600} />
+        <Skeleton height={600} />
       </div>
     );
 
@@ -48,22 +39,27 @@ const App = () => {
       </Box>
       <div className="grid">
         {roomList?.map((room) => {
+          console.log(room, "room");
           return (
             <Box key={room.id}>
               <div className="box-card">
-                <div>
-                  <div className="text-left">
-                    <span
-                      style={{
-                        fontSize: 24,
-                      }}
-                    >
-                      Room Id:
-                    </span>{" "}
-                    {room.id}
-                    <br />
-                  </div>
-                </div>
+                <Box display={"flex"} gap={5} alignItems="center">
+                  <Box>
+                    <div className="text-left">
+                      <span
+                        style={{
+                          fontSize: 24,
+                        }}
+                      >
+                        Room Id:
+                      </span>{" "}
+                      {room.id}
+                      <Box pl={2}>
+                        <Chip label={room.status} />
+                      </Box>
+                    </div>
+                  </Box>
+                </Box>
                 <div className="box-card__img">
                   <Image
                     src={"/assets/img/badge.svg"}
@@ -74,32 +70,38 @@ const App = () => {
                 </div>
                 <div className="text-center">{room.tree_name || "Name"}</div>
 
-                <Box
-                  sx={{
-                    margin: "0 auto",
-                    paddingTop: 4,
-                  }}
-                >
-                  {room.tree_id !== 0 ? (
-                    <Button
-                      color="secondary"
-                      variant="contained"
-                      onClick={() => {
-                        toggle();
-                        setCurrentRoomId(room.id);
-                      }}
-                    >
-                      Join room
-                    </Button>
-                  ) : (
-                    <Button
-                      color="primary"
-                      variant="outlined"
-                      onClick={toggleAddWhiteList}
-                    >
-                      Add white list
-                    </Button>
-                  )}
+                {room.status == "open" && (
+                  <Box
+                    sx={{
+                      margin: "0 auto",
+                      paddingTop: 4,
+                    }}
+                  >
+                    {room.tree_id !== 0 ? (
+                      <Button
+                        color="secondary"
+                        variant="contained"
+                        onClick={() => {
+                          toggle();
+                          setCurrentRoomId(room.id);
+                        }}
+                      >
+                        Join room
+                      </Button>
+                    ) : (
+                      <Button
+                        color="primary"
+                        variant="outlined"
+                        onClick={toggleAddWhiteList}
+                      >
+                        Add white list
+                      </Button>
+                    )}
+                  </Box>
+                )}
+
+                <Box textAlign={"center"} pt={1}>
+                  <Countdown date={room.start_time + 10000} />
                 </Box>
                 <Box py={2} textAlign="center">
                   Create at:{" "}

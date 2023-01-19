@@ -18,6 +18,7 @@ import {
 import { useRoomService } from "@services/roomService";
 import Image from "next/image";
 import { useState } from "react";
+import Countdown from "react-countdown";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -50,6 +51,7 @@ const Rooms = () => {
       </Box>
       <div className="grid">
         {roomList?.map((room) => {
+          const timeCountDown = room.start_time * 1000 + room.duration_time;
           return (
             <Box key={room.id}>
               <div className="box-card">
@@ -68,7 +70,9 @@ const Rooms = () => {
                   <Box>
                     <Chip
                       label={room.status}
-                      color={`${room.id == "ready" ? "success" : "primary"}`}
+                      color={`${
+                        room.status == "ready" ? "success" : "primary"
+                      }`}
                     />
                   </Box>
                 </div>
@@ -89,16 +93,20 @@ const Rooms = () => {
                   }}
                 >
                   {room.tree_id !== 0 ? (
-                    <Button
-                      color="secondary"
-                      variant="contained"
-                      onClick={() => {
-                        toggle();
-                        setCurrentRoomId(room.id);
-                      }}
-                    >
-                      Join room
-                    </Button>
+                    <Box>
+                      {room.status == "open" && timeCountDown > Date.now() && (
+                        <Button
+                          color="secondary"
+                          variant="contained"
+                          onClick={() => {
+                            toggle();
+                            setCurrentRoomId(room.id);
+                          }}
+                        >
+                          Join room
+                        </Button>
+                      )}
+                    </Box>
                   ) : (
                     <Button
                       color="primary"
@@ -109,9 +117,11 @@ const Rooms = () => {
                     </Button>
                   )}
                 </Box>
-                <Box py={2} textAlign="center">
-                  Create at:{" "}
-                  <span>{new Date(room.created_at).toLocaleString()}</span>
+
+                <Box textAlign={"center"}>
+                  <Countdown date={timeCountDown}>
+                    <span></span>
+                  </Countdown>
                 </Box>
               </div>
               <ModalJoinRoom

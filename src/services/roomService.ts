@@ -9,7 +9,7 @@ export const useRoomService = (time?: number) => {
     queryKey: [queryKey],
     queryFn: async () => {
       const data = await zkApi.getRoom();
-      return data;
+      return data.sort();
     },
     refetchOnWindowFocus: false,
     staleTime: 30000,
@@ -30,6 +30,7 @@ export const useRoomService = (time?: number) => {
   // })
 
   return {
+    refetch,
     data,
     isLoading,
   };

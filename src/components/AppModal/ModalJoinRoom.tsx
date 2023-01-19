@@ -18,6 +18,7 @@ import * as yup from "yup";
 const schema = yup.object().shape({
   code: yup.string().required(),
   email: yup.string().required(),
+  bidValue: yup.number().required(),
 });
 
 const ModalJoinRoom = ({ open, toggle, roomId }) => {
@@ -54,7 +55,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
       zkApi.joinRoom(payload),
       zkApi.joinBidding({
         ...payload,
-        bid_value: formValues.bidValue,
+        bid_value: +formValues.bidValue,
       }),
     ])
       .then(([proofId, bid_data]) => {
@@ -62,6 +63,9 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
         updateBidData(bid_data);
         toast.success("Join room successfully");
         router.push(`/rooms/${roomId}`);
+      })
+      .catch((e) => {
+        toast.error(e.message);
       })
       .finally(() => {
         setTimeout(() => {

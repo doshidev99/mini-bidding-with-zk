@@ -42,8 +42,6 @@ const Login = () => {
         textAlign: "center",
       }}
     >
-      {isLoading && "loading"}
-      <button onClick={selectTab}>starting</button>
       <Box
         sx={{
           padding: 10,

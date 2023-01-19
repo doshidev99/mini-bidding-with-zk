@@ -1,11 +1,8 @@
-import { zkApi } from "@api/zkApi";
-import BamInput from "@components/Form/BamInput";
-import { yupResolver } from "@hookform/resolvers/yup";
+import CloseRoom from "@components/AppModal/CloseRoom";
+import OpenRoom from "@components/AppModal/OpenRoom";
 import { useToggle } from "@hooks/useToggle";
-import { Button, Modal, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import { Box } from "@mui/system";
-import { useForm } from "react-hook-form";
-import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
@@ -14,34 +11,12 @@ const schema = yup.object().shape({
 
 const Dashboard = () => {
   const [open, toggle] = useToggle();
-
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<{
-    roomId: number;
-  }>({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      roomId: null,
-    },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (formValues) => {
-    try {
-      await zkApi.openRoom({
-        start_after: 5,
-        room_id: formValues.roomId,
-      });
-
-      toast.success("Room opened successfully");
-    } catch (e) {}
-  };
+  const [closeRoom, toggleCloseRoom] = useToggle();
 
   return (
     <div>
+      <OpenRoom open={open} toggle={toggle} />
+      <CloseRoom open={closeRoom} toggle={toggleCloseRoom} />
       <Box py={2}>
         <Button
           sx={{
@@ -59,38 +34,11 @@ const Dashboard = () => {
             minWidth: 170,
           }}
           variant="outlined"
+          onClick={toggleCloseRoom}
         >
           Close room
         </Button>
       </Box>
-
-      <Modal open={open} onClose={toggle}>
-        <Box sx={style}>
-          <Typography textAlign={"center"} pb={2} variant="subtitle1">
-            Open room bidding
-          </Typography>
-
-          <BamInput
-            control={control}
-            name="roomId"
-            placeholder="Enter your room"
-            label="roomId"
-            rules={{ required: true }}
-            error={errors.roomId}
-            autoFocus={true}
-          />
-
-          <Box pt={2} textAlign="right">
-            <Button
-              variant="outlined"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-            >
-              <Typography>Open</Typography>
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
     </div>
   );
 };

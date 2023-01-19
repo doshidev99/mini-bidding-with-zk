@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useToggle } from "@hooks/useToggle";
 import { Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import { useRoomService } from "@services/roomService";
 import { randomInfo } from "@utils/generatorData";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,6 +22,8 @@ const schema = yup.object().shape({
 });
 
 const ModalCreateRoom = ({ open, toggle }) => {
+  const { refetch } = useRoomService();
+
   const [submitting, onSubmitting] = useState(false);
 
   const {
@@ -58,7 +61,8 @@ const ModalCreateRoom = ({ open, toggle }) => {
         duration_time: 30,
       };
       const _data = await zkApi.createRoom(payload);
-      toast.success("Create room successfully");
+      refetch();
+      toast.success(`Create room ${_data.id} successfully`);
       toggle();
     } catch (e) {
     } finally {

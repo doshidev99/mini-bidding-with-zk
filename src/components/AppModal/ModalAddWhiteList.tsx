@@ -16,7 +16,7 @@ import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
 const ModalAddWhiteList = ({ open, toggle }) => {
-  const { data: roomList, isLoading } = useRoomService();
+  const { refetch, data: roomList, isLoading } = useRoomService();
   const [submitting, onSubmitting] = useState(false);
 
   const schema = yup.object().shape({
@@ -62,6 +62,7 @@ const ModalAddWhiteList = ({ open, toggle }) => {
     };
     try {
       await zkApi.importWhiteList(payload);
+      refetch();
       toast.success("Import whitelist success");
     } catch (e) {
       console.log(e);
