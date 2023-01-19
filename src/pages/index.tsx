@@ -1,25 +1,12 @@
-import { zkApi } from "@api/zkApi";
 import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
 import ModalCreateRoom from "@components/AppModal/ModalCreateRoom";
 import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
-import BamInput from "@components/Form/BamInput";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useToggle } from "@hooks/useToggle";
-import {
-  Badge,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Modal,
-  Skeleton,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, Skeleton, Typography } from "@mui/material";
 import { useRoomService } from "@services/roomService";
 import Image from "next/image";
 import { useState } from "react";
 import Countdown from "react-countdown";
-import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
@@ -138,7 +125,7 @@ const Rooms = () => {
         })}
       </div>
 
-      {roomList.length == 0 && (
+      {roomList?.length == 0 && (
         <Typography textAlign={"center"} color="secondary ">
           Not have room this time
         </Typography>

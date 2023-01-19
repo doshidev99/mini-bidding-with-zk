@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useRoomService } from "@services/roomService";
+import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -18,6 +19,7 @@ import * as yup from "yup";
 const ModalAddWhiteList = ({ open, toggle }) => {
   const { refetch, data: roomList, isLoading } = useRoomService();
   const [submitting, onSubmitting] = useState(false);
+  const { updateDetailRoom } = useStoreDataRoom();
 
   const schema = yup.object().shape({
     store: yup.array().of(
@@ -64,6 +66,8 @@ const ModalAddWhiteList = ({ open, toggle }) => {
       await zkApi.importWhiteList(payload);
       refetch();
       toast.success("Import whitelist success");
+      const _data = await zkApi.getRoomById(formValues.roomId);
+      updateDetailRoom(_data);
     } catch (e) {
       console.log(e);
     } finally {
@@ -77,10 +81,10 @@ const ModalAddWhiteList = ({ open, toggle }) => {
   };
 
   const optionRoomList = roomList
-    .filter((r) => r.tree_id == 0)
+    ?.filter((r) => r.tree_id == 0)
     ?.map((room) => ({
       value: room.id,
-      label: room.name,
+      label: room.name + "room ID: " + room.id,
     }));
 
   if (isLoading) return <CircularProgress />;

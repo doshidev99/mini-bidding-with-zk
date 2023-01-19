@@ -22,7 +22,7 @@ const schema = yup.object().shape({
 });
 
 const ModalCreateRoom = ({ open, toggle }) => {
-  const { refetch } = useRoomService();
+  const { create } = useRoomService();
 
   const [submitting, onSubmitting] = useState(false);
 
@@ -60,9 +60,7 @@ const ModalCreateRoom = ({ open, toggle }) => {
         bid_type: "only_once",
         duration_time: 30,
       };
-      const _data = await zkApi.createRoom(payload);
-      refetch();
-      toast.success(`Create room ${_data.id} successfully`);
+      const _data = await create.mutateAsync(payload);
       toggle();
     } catch (e) {
     } finally {

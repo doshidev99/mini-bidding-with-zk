@@ -29,7 +29,7 @@ const CloseRoom = ({ open, toggle }) => {
   const onSubmit = async (formValues) => {
     try {
       await zkApi.closeRoom({
-        room_id: formValues.roomId,
+        room_id: +formValues.roomId,
       });
       toast.success("Room closed successfully");
     } catch (e) {

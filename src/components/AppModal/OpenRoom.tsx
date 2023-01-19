@@ -24,7 +24,7 @@ const OpenRoom = ({ open, toggle }) => {
     resolver: yupResolver(schema),
     defaultValues: {
       roomId: null,
-      start_after: 300,
+      start_after: 5,
     },
     mode: "onChange",
   });
@@ -32,7 +32,7 @@ const OpenRoom = ({ open, toggle }) => {
   const onSubmit = async (formValues) => {
     try {
       await zkApi.openRoom({
-        start_after: 300,
+        start_after: formValues.start_after,
         room_id: formValues.roomId,
       });
       toast.success("Room opened successfully");
@@ -61,8 +61,8 @@ const OpenRoom = ({ open, toggle }) => {
           <BamInput
             control={control}
             name="start_after"
-            placeholder="Time start..."
-            label="Time start"
+            placeholder="Start after..."
+            label="Start after"
             rules={{ required: true }}
             error={errors.start_after}
             autoFocus={true}

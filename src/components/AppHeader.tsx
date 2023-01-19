@@ -2,16 +2,14 @@ import { handleLogout } from "@api/axiosClient";
 import {
   Avatar,
   Box,
-  Button,
   IconButton,
   Menu,
   MenuItem,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { authService } from "@services/auth0Service";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
@@ -46,14 +44,16 @@ const AppHeader = () => {
       >
         <Box>
           <Box display={"flex"}>
-            <Box>
-              <Image
-                src="/assets/img/logo.svg"
-                alt=""
-                width={120}
-                height={120}
-              />
-            </Box>
+            <Link href="/rooms">
+              <Box>
+                <Image
+                  src="/assets/img/logo.svg"
+                  alt=""
+                  width={120}
+                  height={120}
+                />
+              </Box>
+            </Link>
           </Box>
         </Box>
 

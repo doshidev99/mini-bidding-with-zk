@@ -6,12 +6,16 @@ export interface IStorageData {
   sessionList: any;
   updateHasBidding: (hasBidding: boolean) => void;
   updateSessionList: (sessionList: any) => void;
+
+  detailRoom: any;
+  updateDetailRoom: (detailRoom: any) => void;
 }
 
 const initialValues = {
   hasBidding: false,
   isLoading: false,
   sessionList: [],
+  detailRoom: null,
 };
 
 export const useStoreData = create<IStorageData & {}>()((set) => ({
@@ -23,5 +27,10 @@ export const useStoreData = create<IStorageData & {}>()((set) => ({
         ...state,
         sessionList,
       };
+    }),
+
+  updateDetailRoom: (detailRoom: any) =>
+    set({
+      detailRoom,
     }),
 }));

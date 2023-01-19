@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
+import { LocalStorage } from "@utils/newLocalstorage";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -61,8 +62,16 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
       .then(([proofId, bid_data]) => {
         updateProofId(proofId);
         updateBidData(bid_data);
+        const dataSave = {
+          room_id: roomId,
+          email: formValues.email,
+          private_code: formValues.code,
+          bid_data,
+          proofId,
+        };
+        LocalStorage.set("proof", dataSave);
         toast.success("Join room successfully");
-        router.push(`/rooms/${roomId}`);
+        toggle();
       })
       .catch((e) => {
         toast.error(e.message);
