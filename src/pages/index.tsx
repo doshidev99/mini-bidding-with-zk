@@ -1,10 +1,9 @@
-import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
 import ModalCreateRoom from "@components/AppModal/ModalCreateRoom";
-import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
 import { useToggle } from "@hooks/useToggle";
 import { Box, Button, Chip, Skeleton, Typography } from "@mui/material";
 import { useRoomService } from "@services/roomService";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import Countdown from "react-countdown";
 import * as yup from "yup";
@@ -40,7 +39,7 @@ const Rooms = () => {
         {roomList?.map((room) => {
           const timeCountDown = room.start_time * 1000 + room.duration_time;
           return (
-            <Box key={room.id}>
+            <Link href={`/rooms/${room.id}`} key={room.id}>
               <div className="box-card">
                 <div>
                   <div className="text-left">
@@ -73,54 +72,13 @@ const Rooms = () => {
                 </div>
                 <div className="text-center">{room.name || "Name"}</div>
 
-                <Box
-                  sx={{
-                    margin: "0 auto",
-                    paddingTop: 4,
-                  }}
-                >
-                  {room.tree_id !== 0 ? (
-                    <Box>
-                      {room.status == "open" && timeCountDown > Date.now() && (
-                        <Button
-                          color="secondary"
-                          variant="contained"
-                          onClick={() => {
-                            toggle();
-                            setCurrentRoomId(room.id);
-                          }}
-                        >
-                          Join room
-                        </Button>
-                      )}
-                    </Box>
-                  ) : (
-                    <Button
-                      color="primary"
-                      variant="outlined"
-                      onClick={toggleAddWhiteList}
-                    >
-                      Add white list
-                    </Button>
-                  )}
-                </Box>
-
                 <Box textAlign={"center"}>
                   <Countdown date={timeCountDown}>
                     <span></span>
                   </Countdown>
                 </Box>
               </div>
-              <ModalJoinRoom
-                open={open}
-                toggle={toggle}
-                roomId={currentRoomId}
-              />
-              <ModalAddWhiteList
-                open={openAddWhiteList}
-                toggle={toggleAddWhiteList}
-              />
-            </Box>
+            </Link>
           );
         })}
       </div>
@@ -134,6 +92,10 @@ const Rooms = () => {
       <ModalCreateRoom open={openCreate} toggle={toggleCreate} />
     </div>
   );
+};
+
+const DetailRoom = () => {
+  return <div>hello</div>;
 };
 
 export default Rooms;
