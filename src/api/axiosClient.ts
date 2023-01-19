@@ -26,7 +26,6 @@ const processQueue = (error: any, token = null) => {
 export const handleLogout = () => {
   const authService = new AuthService();
   authService.logout();
-  
 };
 
 const getInstance = (baseURL: string) => {
@@ -44,6 +43,7 @@ const getInstance = (baseURL: string) => {
       return config;
     },
     function (error) {
+      console.log({ error });
       return Promise.reject(error);
     }
   );
