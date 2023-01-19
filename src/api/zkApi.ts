@@ -5,8 +5,13 @@ export const zkApi = {
     const res = await axiosInstance.get("/rooms");
     return res;
   },
+
   async createRoom(payload): Promise<any> {
     const res = await axiosInstance.post("/room", payload);
+    return res;
+  },
+  async getResultByRoom(payload: { room_id: number }): Promise<any> {
+    const res = await axiosInstance.post("/room/result", payload);
     return res;
   },
 

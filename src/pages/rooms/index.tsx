@@ -84,7 +84,7 @@ const Rooms = () => {
                     height={200}
                   />
                 </div>
-                <div className="text-center">{room.tree_name || "Name"}</div>
+                <div className="text-center">{room.name || "Name"}</div>
 
                 <Box
                   sx={{

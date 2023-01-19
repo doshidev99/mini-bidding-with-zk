@@ -1,11 +1,12 @@
 import { zkApi } from "@api/zkApi";
 import AppModalDetail from "@components/AppModalDetail";
 import { useToggle } from "@hooks/useToggle";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
+import { toast } from "react-hot-toast";
 
 const RoomDetail = () => {
   const { query } = useRouter();
@@ -13,6 +14,8 @@ const RoomDetail = () => {
   const [isOpen, onOpen] = useToggle();
   const [openModal, toggleModal] = useToggle();
   const { bid_data, proof_id } = useStoreDataRoom();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   console.log(bid_data, "bid_data");
   console.log(proof_id, "proof_id");
@@ -40,9 +43,18 @@ const RoomDetail = () => {
       proof_id,
       bid_data,
     };
-
-    const data = await zkApi.bidding(payload);
-    console.log(data);
+    try {
+      setIsLoading(true);
+      await zkApi.bidding(payload);
+      const data = await zkApi.getResultByRoom({
+        room_id: +query.id,
+      });
+      console.log({ data });
+      toast.success("Bidding successfully!");
+    } catch (e) {
+      toast.error(e.message);
+    }
+    setIsLoading(false);
   };
   return (
     <div className="container">
@@ -121,7 +133,13 @@ const RoomDetail = () => {
             />
           </div>
           <Box pb={2} textAlign="center">
-            <Button variant="outlined" onClick={onBidding}>
+            <Button
+              variant="outlined"
+              onClick={onBidding}
+              startIcon={
+                isLoading && <CircularProgress size={20} color="inherit" />
+              }
+            >
               Bidding
             </Button>
           </Box>

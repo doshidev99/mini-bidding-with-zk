@@ -42,7 +42,7 @@ const CloseRoom = ({ open, toggle }) => {
       <Modal open={open} onClose={toggle}>
         <Box sx={style}>
           <Typography textAlign={"center"} pb={2} variant="subtitle1">
-            Open room bidding
+            Close room bidding
           </Typography>
 
           <BamInput
@@ -61,7 +61,7 @@ const CloseRoom = ({ open, toggle }) => {
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >
-              <Typography>Open</Typography>
+              <Typography>Close</Typography>
             </Button>
           </Box>
         </Box>
