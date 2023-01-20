@@ -24,7 +24,6 @@ export default function ResultRoomTable({ open, toggle, currentResult }) {
                     />
                   </ListItemAvatar>
                   <ListItemText
-                    primary={item.bidder}
                     secondary={
                       <React.Fragment>
                         <Typography
@@ -33,8 +32,18 @@ export default function ResultRoomTable({ open, toggle, currentResult }) {
                           variant="body2"
                           color="text.primary"
                         >
+                          Bidder: {item.bidder}
+                        </Typography>
+                        <br />
+                        <Typography
+                          sx={{ display: "inline" }}
+                          component="span"
+                          variant="body2"
+                          color="text.primary"
+                        >
                           User: {item.user}
                         </Typography>
+                        — Price: {item.price}
                       </React.Fragment>
                     }
                   />

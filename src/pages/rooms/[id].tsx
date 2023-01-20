@@ -1,10 +1,18 @@
 import { zkApi } from "@api/zkApi";
+import CloseRoom from "@components/AppModal/CloseRoom";
 import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
 import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
+import OpenRoom from "@components/AppModal/OpenRoom";
 import ResultRoomTable from "@components/ResultRoomTable";
 import WhiteListTable from "@components/WhiteListTable";
 import { useToggle } from "@hooks/useToggle";
-import { Box, Button, CircularProgress, Skeleton } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import { LocalStorage } from "@utils/newLocalstorage";
 import Image from "next/image";
@@ -16,7 +24,8 @@ import { toast } from "react-hot-toast";
 const RoomDetail = () => {
   const { query } = useRouter();
   const [currentTab, setCurrentTab] = useState(1);
-  const [isOpen, onOpen] = useToggle();
+  const [currenTabLeft, setCurrentTabLeft] = useState(1);
+  const [isOpen, onOpen] = useToggle(true);
   const [openJoinRoom, toggleJoinRoom] = useToggle();
   const [openAddWhiteList, toggleAddWhiteList] = useToggle();
 
@@ -26,7 +35,6 @@ const RoomDetail = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [currentResult, setCurrentResult] = useState([]);
 
   useEffect(() => {
     const getRoomDetail = async () => {
@@ -42,18 +50,72 @@ const RoomDetail = () => {
     getRoomDetail();
   }, [query.id, updateDetailRoom]);
 
+  const [open, toggle] = useToggle();
+  const [closeRoom, toggleCloseRoom] = useToggle();
+
   const renderComponent = () => {
     switch (currentTab) {
       case 1:
         return (
           <Box pt={3} className="vault-content">
-            0x000000000
+            <Button
+              sx={{
+                minWidth: 170,
+              }}
+              variant="outlined"
+              onClick={toggle}
+              disabled={currentRoom?.status != "ready"}
+            >
+              Open room
+            </Button>
           </Box>
         );
       case 2:
         return (
           <Box pt={3} className="vault-content">
-            No imported destinations
+            <Button
+              sx={{
+                minWidth: 170,
+              }}
+              variant="outlined"
+              onClick={toggleCloseRoom}
+              disabled={
+                currentRoom?.status == "ready" || currentRoom?.status == "close"
+              }
+            >
+              Close room
+            </Button>
+          </Box>
+        );
+    }
+  };
+
+  const renderComponent2 = () => {
+    switch (currenTabLeft) {
+      case 1:
+        return (
+          <Box className="vault-content">
+            <Box>
+              {currentRoom?.whitelist.length > 0 && (
+                <WhiteListTable whiteList={currentRoom?.whitelist || []} />
+              )}
+            </Box>
+          </Box>
+        );
+      case 2:
+        return (
+          <Box pt={3} className="vault-content">
+            {currentRoom?.result?.length > 0 ? (
+              <ResultRoomTable
+                currentResult={currentRoom.result || []}
+                open={openResult}
+                toggle={toggleResult}
+              />
+            ) : (
+              <Typography fontSize={14}>
+                There is no result for this room yet. Please wait for the
+              </Typography>
+            )}
           </Box>
         );
     }
@@ -79,10 +141,10 @@ const RoomDetail = () => {
 
   const handleResult = async () => {
     try {
-      const data = await zkApi.getResultByRoom({
-        room_id: +query.id,
-      });
-      setCurrentResult(data);
+      // const data = await zkApi.getResultByRoom({
+      // room_id: +query.id,
+      // });
+      // setCurrentResult(data);
       toggleResult();
     } catch (e) {
       toast.error(e.message);
@@ -99,6 +161,9 @@ const RoomDetail = () => {
 
   return (
     <div className="container">
+      <OpenRoom open={open} toggle={toggle} />
+      <CloseRoom open={closeRoom} toggle={toggleCloseRoom} />
+
       <ModalJoinRoom
         open={openJoinRoom}
         toggle={toggleJoinRoom}
@@ -115,7 +180,7 @@ const RoomDetail = () => {
                 <div className={`box-vault ${isOpen && "open"}`}>
                   <Box>
                     <Box pt={2} pl={2}>
-                      My Sismo vault
+                      Room Action
                     </Box>
                     <div>
                       <Box display={"flex"} pt={4}>
@@ -125,7 +190,7 @@ const RoomDetail = () => {
                             currentTab == 1 && "active"
                           } `}
                         >
-                          Sources
+                          Open Room
                         </Box>
                         <Box
                           onClick={() => setCurrentTab(2)}
@@ -133,7 +198,7 @@ const RoomDetail = () => {
                             currentTab == 2 && "active"
                           } `}
                         >
-                          Destinations
+                          Close Room
                         </Box>
                       </Box>
                       {renderComponent()}
@@ -153,6 +218,45 @@ const RoomDetail = () => {
                         width={14}
                         height={14}
                       />
+                    </div>
+                  </Box>
+                </div>
+                {!isOpen && (
+                  <div className={`vault-transform`} onClick={onOpen}>
+                    <Image
+                      className={`vault-transform__img ${isOpen && "open"}`}
+                      src={"/assets/img/arrow.svg"}
+                      alt="Sismo"
+                      width={14}
+                      height={14}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="box-vault-flex">
+                <div className={`box-vault left ${isOpen && "open"}`}>
+                  <Box>
+                    <div>
+                      <Box display={"flex"}>
+                        <Box
+                          onClick={() => setCurrentTabLeft(1)}
+                          className={`vault-tab ${
+                            currenTabLeft == 1 && "active"
+                          } `}
+                        >
+                          White list
+                        </Box>
+                        <Box
+                          onClick={() => setCurrentTabLeft(2)}
+                          className={`vault-tab ${
+                            currenTabLeft == 2 && "active"
+                          } `}
+                        >
+                          Result
+                        </Box>
+                      </Box>
+                      {renderComponent2()}
                     </div>
                   </Box>
                 </div>
@@ -200,6 +304,13 @@ const RoomDetail = () => {
                 >
                   {currentRoom?.tree_id != 0 ? (
                     <Box>
+                      <Box>
+                        {currentRoom?.status == "ready" && (
+                          <Typography color={"secondary"}>
+                            Waiting room to open...
+                          </Typography>
+                        )}
+                      </Box>
                       {currentRoom?.status == "open" && (
                         <Button
                           color="secondary"
@@ -258,18 +369,6 @@ const RoomDetail = () => {
             </Box>
           )}
         </div>
-
-        {currentRoom?.whitelist.length > 0 && (
-          <WhiteListTable whiteList={currentRoom?.whitelist || []} />
-        )}
-
-        {currentResult?.length > 0 && (
-          <ResultRoomTable
-            currentResult={currentResult || []}
-            open={openResult}
-            toggle={toggleResult}
-          />
-        )}
       </Box>
     </div>
   );

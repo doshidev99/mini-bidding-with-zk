@@ -14,6 +14,7 @@ import * as yup from "yup";
 
 const schema = yup.object().shape({
   name: yup.string().required(),
+  duration_time: yup.number().required(),
   info: yup.object().shape({
     description: yup.string().required(),
     website: yup.string().required(),
@@ -33,6 +34,7 @@ const ModalCreateRoom = ({ open, toggle }) => {
     formState: { errors },
   } = useForm<{
     name: string;
+    duration_time: number;
     info: {
       description: string;
       website: string;
@@ -58,7 +60,7 @@ const ModalCreateRoom = ({ open, toggle }) => {
         ...formValues,
         visibility: "private",
         bid_type: "only_once",
-        duration_time: 30,
+        duration_time: formValues.duration_time,
       };
       const _data = await create.mutateAsync(payload);
       toggle();
@@ -106,6 +108,16 @@ const ModalCreateRoom = ({ open, toggle }) => {
               value={randomInfo().phone}
               rules={{ required: true }}
               error={errors.info?.phone}
+              autoFocus={true}
+            />
+
+            <BamInput
+              control={control}
+              label="Duration time"
+              name="duration_time"
+              placeholder="Enter your room's phone number"
+              rules={{ required: true }}
+              error={errors.duration_time}
               autoFocus={true}
             />
 

@@ -36,6 +36,7 @@ const OpenRoom = ({ open, toggle }) => {
         room_id: formValues.roomId,
       });
       toast.success("Room opened successfully");
+      toggle();
     } catch (e) {
       toast.error(e.message);
     }
@@ -74,7 +75,7 @@ const OpenRoom = ({ open, toggle }) => {
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >
-              <Typography>Open</Typography>
+              <Typography>Submit</Typography>
             </Button>
           </Box>
         </Box>

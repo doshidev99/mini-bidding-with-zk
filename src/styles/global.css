@@ -104,6 +104,10 @@ a {
   transition: all 0.4s ease 0s;
 }
 
+.box-vault.left {
+  left: -68% !important;
+}
+
 .box-vault.open {
   opacity: 1;
   left: 100%;

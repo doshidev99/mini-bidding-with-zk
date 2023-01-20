@@ -61,7 +61,7 @@ const CloseRoom = ({ open, toggle }) => {
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >
-              <Typography>Close</Typography>
+              <Typography>Submit</Typography>
             </Button>
           </Box>
         </Box>

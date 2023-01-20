@@ -1,25 +1,21 @@
-import * as React from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/system";
+import * as React from "react";
 
 export default function WhiteListTable({ whiteList }) {
   return (
     <Box>
-      <Typography>White List</Typography>
-      <List sx={{ width: "100%", maxWidth: 400, bgcolor: "background.paper" }}>
+      <List sx={{ width: "100%", borderRadius: 5 }}>
         {whiteList?.map((item, idx) => {
           return (
             <>
               <ListItem key={idx} alignItems="flex-start">
-                <ListItemAvatar>
+                {/* <ListItemAvatar>
                   <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-                </ListItemAvatar>
+                </ListItemAvatar> */}
                 <ListItemText
                   primary={item.data.user}
                   secondary={
