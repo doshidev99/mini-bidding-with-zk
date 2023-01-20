@@ -55,9 +55,6 @@ const AppHeader = () => {
               </Box>
             </Link>
           </Box>
-          <Box>
-            <Link href="/dashboard">Dashboard</Link>
-          </Box>
         </Box>
 
         <Box>

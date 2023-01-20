@@ -36,6 +36,9 @@ const RoomDetail = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
 
+  const [open, toggle] = useToggle();
+  const [closeRoom, toggleCloseRoom] = useToggle();
+
   useEffect(() => {
     const getRoomDetail = async () => {
       if (!query.id) return;
@@ -48,45 +51,49 @@ const RoomDetail = () => {
     };
 
     getRoomDetail();
-  }, [query.id, updateDetailRoom]);
+  }, [query.id, updateDetailRoom, open, closeRoom]);
 
-  const [open, toggle] = useToggle();
-  const [closeRoom, toggleCloseRoom] = useToggle();
+  const timeCountDown = useMemo(
+    () =>
+      currentRoom
+        ? currentRoom.start_time * 1000 + currentRoom.duration_time * 1000
+        : 0,
+    [currentRoom]
+  );
 
   const renderComponent = () => {
-    switch (currentTab) {
-      case 1:
-        return (
-          <Box pt={3} className="vault-content">
-            <Button
-              sx={{
-                minWidth: 170,
-              }}
-              variant="outlined"
-              onClick={toggle}
-              disabled={currentRoom?.status != "ready"}
-            >
-              Open room
-            </Button>
-          </Box>
-        );
-      case 2:
-        return (
-          <Box pt={3} className="vault-content">
-            <Button
-              sx={{
-                minWidth: 170,
-              }}
-              variant="outlined"
-              onClick={toggleCloseRoom}
-              disabled={
-                currentRoom?.status == "ready" || currentRoom?.status == "close"
-              }
-            >
-              Close room
-            </Button>
-          </Box>
-        );
+    if (currentRoom?.status == "ready") {
+      return (
+        <Box pt={3} className="vault-content">
+          <Button
+            sx={{
+              minWidth: 170,
+            }}
+            variant="outlined"
+            onClick={toggle}
+          >
+            Open room
+          </Button>
+        </Box>
+      );
+    }
+
+    if (currentRoom?.status == "close") {
+      return (
+        <Box pt={3} className="vault-content">
+          {currentRoom?.result?.length > 0 ? (
+            <ResultRoomTable
+              currentResult={currentRoom.result || []}
+              open={openResult}
+              toggle={toggleResult}
+            />
+          ) : (
+            <Typography fontSize={14}>
+              There is no result for this room yet. Please wait for the
+            </Typography>
+          )}
+        </Box>
+      );
     }
   };
 
@@ -100,22 +107,6 @@ const RoomDetail = () => {
                 <WhiteListTable whiteList={currentRoom?.whitelist || []} />
               )}
             </Box>
-          </Box>
-        );
-      case 2:
-        return (
-          <Box pt={3} className="vault-content">
-            {currentRoom?.result?.length > 0 ? (
-              <ResultRoomTable
-                currentResult={currentRoom.result || []}
-                open={openResult}
-                toggle={toggleResult}
-              />
-            ) : (
-              <Typography fontSize={14}>
-                There is no result for this room yet. Please wait for the
-              </Typography>
-            )}
           </Box>
         );
     }
@@ -151,14 +142,6 @@ const RoomDetail = () => {
     }
   };
 
-  const timeCountDown = useMemo(
-    () =>
-      currentRoom
-        ? currentRoom.start_time * 1000 + currentRoom.duration_time
-        : 0,
-    [currentRoom]
-  );
-
   return (
     <div className="container">
       <OpenRoom open={open} toggle={toggle} />
@@ -177,50 +160,45 @@ const RoomDetail = () => {
           ) : (
             <>
               <div className="box-vault-flex">
-                <div className={`box-vault ${isOpen && "open"}`}>
-                  <Box>
-                    <Box pt={2} pl={2}>
-                      Room Action
+                {currentRoom?.tree_id != 0 && (
+                  <div className={`box-vault ${isOpen && "open"}`}>
+                    <Box>
+                      <Box pt={2} pl={2}>
+                        Room Action
+                      </Box>
+                      <div>
+                        <Box display={"flex"} pt={4}>
+                          <Box
+                            onClick={() => setCurrentTab(1)}
+                            className={`vault-tab ${
+                              currentTab == 1 && "active"
+                            } `}
+                          >
+                            Action..
+                          </Box>
+                        </Box>
+                        {renderComponent()}
+                      </div>
+
+                      <div
+                        className={`vault-transform`}
+                        onClick={onOpen}
+                        style={{
+                          top: 0,
+                        }}
+                      >
+                        <Image
+                          className={`vault-transform__img ${isOpen && "open"}`}
+                          src={"/assets/img/arrow.svg"}
+                          alt="Sismo"
+                          width={14}
+                          height={14}
+                        />
+                      </div>
                     </Box>
-                    <div>
-                      <Box display={"flex"} pt={4}>
-                        <Box
-                          onClick={() => setCurrentTab(1)}
-                          className={`vault-tab ${
-                            currentTab == 1 && "active"
-                          } `}
-                        >
-                          Open Room
-                        </Box>
-                        <Box
-                          onClick={() => setCurrentTab(2)}
-                          className={`vault-tab ${
-                            currentTab == 2 && "active"
-                          } `}
-                        >
-                          Close Room
-                        </Box>
-                      </Box>
-                      {renderComponent()}
-                    </div>
+                  </div>
+                )}
 
-                    <div
-                      className={`vault-transform`}
-                      onClick={onOpen}
-                      style={{
-                        top: 0,
-                      }}
-                    >
-                      <Image
-                        className={`vault-transform__img ${isOpen && "open"}`}
-                        src={"/assets/img/arrow.svg"}
-                        alt="Sismo"
-                        width={14}
-                        height={14}
-                      />
-                    </div>
-                  </Box>
-                </div>
                 {!isOpen && (
                   <div className={`vault-transform`} onClick={onOpen}>
                     <Image
@@ -234,44 +212,40 @@ const RoomDetail = () => {
                 )}
               </div>
 
-              <div className="box-vault-flex">
-                <div className={`box-vault left ${isOpen && "open"}`}>
-                  <Box>
-                    <div>
-                      <Box display={"flex"}>
-                        <Box
-                          onClick={() => setCurrentTabLeft(1)}
-                          className={`vault-tab ${
-                            currenTabLeft == 1 && "active"
-                          } `}
-                        >
-                          White list
-                        </Box>
-                        <Box
-                          onClick={() => setCurrentTabLeft(2)}
-                          className={`vault-tab ${
-                            currenTabLeft == 2 && "active"
-                          } `}
-                        >
-                          Result
-                        </Box>
+              {currentRoom?.tree_id != 0 && (
+                <>
+                  <div className="box-vault-flex">
+                    <div className={`box-vault left ${isOpen && "open"}`}>
+                      <Box>
+                        <div>
+                          <Box display={"flex"}>
+                            <Box
+                              onClick={() => setCurrentTabLeft(1)}
+                              className={`vault-tab ${
+                                currenTabLeft == 1 && "active"
+                              } `}
+                            >
+                              White list
+                            </Box>
+                          </Box>
+                          {renderComponent2()}
+                        </div>
                       </Box>
-                      {renderComponent2()}
                     </div>
-                  </Box>
-                </div>
-                {!isOpen && (
-                  <div className={`vault-transform`} onClick={onOpen}>
-                    <Image
-                      className={`vault-transform__img ${isOpen && "open"}`}
-                      src={"/assets/img/arrow.svg"}
-                      alt="Sismo"
-                      width={14}
-                      height={14}
-                    />
+                    {!isOpen && (
+                      <div className={`vault-transform`} onClick={onOpen}>
+                        <Image
+                          className={`vault-transform__img ${isOpen && "open"}`}
+                          src={"/assets/img/arrow.svg"}
+                          alt="Sismo"
+                          width={14}
+                          height={14}
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </>
+              )}
 
               <div>
                 <div className="text-left">
@@ -311,15 +285,6 @@ const RoomDetail = () => {
                           </Typography>
                         )}
                       </Box>
-                      {currentRoom?.status == "open" && (
-                        <Button
-                          color="secondary"
-                          variant="contained"
-                          onClick={toggleJoinRoom}
-                        >
-                          Join room
-                        </Button>
-                      )}
                     </Box>
                   ) : (
                     <Button
@@ -333,40 +298,49 @@ const RoomDetail = () => {
                 </Box>
 
                 <Box textAlign={"center"} pt={2}>
-                  {currentRoom?.status == "open" &&
-                    !!currentRoom?.start_time && (
-                      <Countdown date={timeCountDown}>
-                        <Button
-                          variant="outlined"
-                          onClick={onBidding}
-                          startIcon={
-                            isLoading && (
-                              <CircularProgress size={20} color="inherit" />
-                            )
-                          }
-                        >
-                          Bidding
-                        </Button>
-                      </Countdown>
-                    )}
+                  {currentRoom?.status == "open" && (
+                    <Countdown date={currentRoom.start_time * 1000}>
+                      <Button
+                        variant="outlined"
+                        onClick={toggleJoinRoom}
+                        startIcon={
+                          isLoading && (
+                            <CircularProgress size={20} color="inherit" />
+                          )
+                        }
+                      >
+                        Bidding
+                      </Button>
+                    </Countdown>
+                  )}
                 </Box>
               </Box>
-              <div className="text-center">ENS Supporter ZK Badge</div>
-            </>
-          )}
 
-          {currentRoom?.status == "close" && (
-            <Box pt={2} textAlign="center">
-              <Button
-                variant="outlined"
-                onClick={handleResult}
-                startIcon={
-                  isLoading && <CircularProgress size={20} color="inherit" />
-                }
-              >
-                Show result
-              </Button>
-            </Box>
+              {currentRoom?.status == "open" && (
+                <Box textAlign={"center"}>
+                  <Typography>Room close after: </Typography>
+                  <Countdown
+                    date={
+                      currentRoom.start_time * 1000 +
+                      currentRoom.duration_time * 1000
+                    }
+                  >
+                    <Box pt={3} className="vault-content">
+                      <Button
+                        sx={{
+                          minWidth: 170,
+                        }}
+                        variant="outlined"
+                        onClick={toggleCloseRoom}
+                      >
+                        Close room
+                      </Button>
+                    </Box>
+                  </Countdown>
+                </Box>
+              )}
+              {/* <div className="text-center">ENS Supporter ZK Badge</div> */}
+            </>
           )}
         </div>
       </Box>

@@ -9,46 +9,43 @@ import { Box } from "@mui/system";
 import * as React from "react";
 
 export default function ResultRoomTable({ open, toggle, currentResult }) {
+  console.log({ currentResult });
+
   return (
     <Modal open={open} onClose={toggle}>
       <Box sx={style}>
         <List>
           {currentResult?.map((item, idx) => {
             return (
-              <>
-                <ListItem key={idx} alignItems="flex-start">
-                  <ListItemAvatar>
-                    <Avatar
-                      alt="Remy Sharp"
-                      src="/static/images/avatar/1.jpg"
-                    />
-                  </ListItemAvatar>
-                  <ListItemText
-                    secondary={
-                      <React.Fragment>
-                        <Typography
-                          sx={{ display: "inline" }}
-                          component="span"
-                          variant="body2"
-                          color="text.primary"
-                        >
-                          Bidder: {item.bidder}
-                        </Typography>
-                        <br />
-                        <Typography
-                          sx={{ display: "inline" }}
-                          component="span"
-                          variant="body2"
-                          color="text.primary"
-                        >
-                          User: {item.user}
-                        </Typography>
-                        — Price: {item.price}
-                      </React.Fragment>
-                    }
-                  />
-                </ListItem>
-              </>
+              <ListItem key={idx} alignItems="flex-start">
+                <ListItemAvatar>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                </ListItemAvatar>
+                <ListItemText
+                  secondary={
+                    <React.Fragment>
+                      <Typography
+                        sx={{ display: "inline" }}
+                        component="span"
+                        variant="body2"
+                        color="text.primary"
+                      >
+                        Bidder: {item.bidder}
+                      </Typography>
+                      <br />
+                      <Typography
+                        sx={{ display: "inline" }}
+                        component="span"
+                        variant="body2"
+                        color="text.primary"
+                      >
+                        User: {item.user}
+                      </Typography>
+                      — Price: {item.price}
+                    </React.Fragment>
+                  }
+                />
+              </ListItem>
             );
           })}
         </List>
