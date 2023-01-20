@@ -1,4 +1,5 @@
 import { zkApi } from "@api/zkApi";
+import BamInput from "@components/Form/BamInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
@@ -8,28 +9,38 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
-const schema = yup.object().shape({});
+const schema = yup.object().shape({
+  duration_time: yup.number().required("Duration time is required"),
+});
 
-const CloseRoom = ({ open, toggle }) => {
+const UpdateDuration = ({ open, toggle }) => {
   const { query } = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { handleSubmit } = useForm({
+  const [isLoading, setIsLoading] = useState(false);
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<{
+    duration_time: number;
+  }>({
     resolver: yupResolver(schema),
-    defaultValues: {},
+    defaultValues: {
+      duration_time: 30,
+    },
     mode: "onChange",
   });
 
   const onSubmit = async (formValues) => {
     try {
       setIsLoading(true);
-
-      await zkApi.closeRoom({
+      await zkApi.updateDuration({
         room_id: +query.id,
+        duration_time: +formValues.duration_time,
       });
 
-      toast.success("Room closed successfully");
-      await zkApi.getResultByRoom({ room_id: +query.id });
+      toast.success("Update duration time successfully");
+      // await zkApi.getResultByRoom({ room_id: +formValues.roomId });
       toggle();
     } catch (e) {
       toast.error(e.message);
@@ -42,8 +53,18 @@ const CloseRoom = ({ open, toggle }) => {
       <Modal open={open} onClose={toggle}>
         <Box sx={style}>
           <Typography textAlign={"center"} pb={2} variant="subtitle1">
-            You are about to close this room. Are you sure?
+            Update duration
           </Typography>
+
+          <BamInput
+            control={control}
+            name="duration_time"
+            placeholder="new duration time..."
+            label="New duration"
+            rules={{ required: true }}
+            error={errors.duration_time}
+            autoFocus={true}
+          />
 
           <Box pt={2} textAlign="right">
             <Button
@@ -52,7 +73,7 @@ const CloseRoom = ({ open, toggle }) => {
               onClick={handleSubmit(onSubmit)}
               startIcon={isLoading && <CircularProgress size={20} />}
             >
-              <Typography>Yes</Typography>
+              <Typography>Submit</Typography>
             </Button>
           </Box>
         </Box>
@@ -75,4 +96,4 @@ const style = {
   p: 4,
 };
 
-export default CloseRoom;
+export default UpdateDuration;

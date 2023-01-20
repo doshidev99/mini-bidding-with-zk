@@ -42,6 +42,13 @@ export const zkApi = {
     const res = await axiosInstance.post("/room/close", payload);
     return res;
   },
+  async updateDuration(payload: {
+    room_id: number;
+    duration_time: number;
+  }): Promise<any> {
+    const res = await axiosInstance.post("/room/duration", payload);
+    return res;
+  },
 
   async joinRoom(payload: {
     room_id: string;

@@ -3,27 +3,26 @@ import BamInput from "@components/Form/BamInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
-  roomId: yup.number().required("Room ID is required"),
   start_after: yup.number().required("start_after is required"),
 });
 
 const OpenRoom = ({ open, toggle }) => {
+  const { query } = useRouter();
   const {
     handleSubmit,
     control,
     formState: { errors },
   } = useForm<{
-    roomId: number;
     start_after: number;
   }>({
     resolver: yupResolver(schema),
     defaultValues: {
-      roomId: null,
       start_after: 5,
     },
     mode: "onChange",
@@ -33,7 +32,7 @@ const OpenRoom = ({ open, toggle }) => {
     try {
       await zkApi.openRoom({
         start_after: formValues.start_after,
-        room_id: formValues.roomId,
+        room_id: +query.id,
       });
       toast.success("Room opened successfully");
       toggle();
@@ -50,15 +49,6 @@ const OpenRoom = ({ open, toggle }) => {
             Open room bidding
           </Typography>
 
-          <BamInput
-            control={control}
-            name="roomId"
-            placeholder="Enter your room"
-            label="roomId"
-            rules={{ required: true }}
-            error={errors.roomId}
-            autoFocus={true}
-          />
           <BamInput
             control={control}
             name="start_after"

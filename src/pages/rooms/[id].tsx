@@ -3,6 +3,7 @@ import CloseRoom from "@components/AppModal/CloseRoom";
 import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
 import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
 import OpenRoom from "@components/AppModal/OpenRoom";
+import UpdateDuration from "@components/AppModal/UpdateDuration";
 import ResultRoomTable from "@components/ResultRoomTable";
 import WhiteListTable from "@components/WhiteListTable";
 import { useToggle } from "@hooks/useToggle";
@@ -37,6 +38,7 @@ const RoomDetail = () => {
   const [fetching, setFetching] = useState(false);
 
   const [open, toggle] = useToggle();
+  const [openDuration, toggleDuration] = useToggle();
   const [closeRoom, toggleCloseRoom] = useToggle();
 
   useEffect(() => {
@@ -91,6 +93,22 @@ const RoomDetail = () => {
         </Box>
       );
     }
+
+    if (currentTab == 2) {
+      return (
+        <Box pt={3} className="vault-content">
+          <Button
+            sx={{
+              minWidth: 170,
+            }}
+            variant="outlined"
+            onClick={toggleDuration}
+          >
+            Update duration
+          </Button>
+        </Box>
+      );
+    }
   };
 
   const renderComponent2 = () => {
@@ -126,22 +144,11 @@ const RoomDetail = () => {
     setIsLoading(false);
   };
 
-  const handleResult = async () => {
-    try {
-      // const data = await zkApi.getResultByRoom({
-      // room_id: +query.id,
-      // });
-      // setCurrentResult(data);
-      toggleResult();
-    } catch (e) {
-      toast.error(e.message);
-    }
-  };
-
   return (
     <div className="container">
       <OpenRoom open={open} toggle={toggle} />
       <CloseRoom open={closeRoom} toggle={toggleCloseRoom} />
+      <UpdateDuration open={openDuration} toggle={toggleDuration} />
 
       <ModalJoinRoom
         open={openJoinRoom}
@@ -171,6 +178,14 @@ const RoomDetail = () => {
                             } `}
                           >
                             Action..
+                          </Box>
+                          <Box
+                            onClick={() => setCurrentTab(2)}
+                            className={`vault-tab ${
+                              currentTab == 2 && "active"
+                            } `}
+                          >
+                            Update duration
                           </Box>
                         </Box>
                         {renderComponent()}
