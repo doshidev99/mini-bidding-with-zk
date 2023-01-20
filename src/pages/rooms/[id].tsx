@@ -45,6 +45,7 @@ const RoomDetail = () => {
       setFetching(true);
       try {
         const _data = await zkApi.getRoomById(query.id);
+        await zkApi.getResultByRoom({ room_id: +query.id });
         updateDetailRoom(_data);
       } catch (e) {}
       setFetching(false);
@@ -82,11 +83,7 @@ const RoomDetail = () => {
       return (
         <Box pt={3} className="vault-content">
           {currentRoom?.result?.length > 0 ? (
-            <ResultRoomTable
-              currentResult={currentRoom.result || []}
-              open={openResult}
-              toggle={toggleResult}
-            />
+            <ResultRoomTable currentResult={currentRoom.result || []} />
           ) : (
             <Typography fontSize={14}>
               There is no result for this room yet. Please wait for the

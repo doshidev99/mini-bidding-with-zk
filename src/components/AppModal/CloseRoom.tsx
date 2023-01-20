@@ -32,6 +32,7 @@ const CloseRoom = ({ open, toggle }) => {
         room_id: +formValues.roomId,
       });
       toast.success("Room closed successfully");
+      toggle();
     } catch (e) {
       toast.error(e.message);
     }
