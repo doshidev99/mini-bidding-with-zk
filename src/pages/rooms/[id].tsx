@@ -45,7 +45,6 @@ const RoomDetail = () => {
       setFetching(true);
       try {
         const _data = await zkApi.getRoomById(query.id);
-        await zkApi.getResultByRoom({ room_id: +query.id });
         updateDetailRoom(_data);
       } catch (e) {}
       setFetching(false);
@@ -296,19 +295,22 @@ const RoomDetail = () => {
 
                 <Box textAlign={"center"} pt={2}>
                   {currentRoom?.status == "open" && (
-                    <Countdown date={currentRoom.start_time * 1000}>
-                      <Button
-                        variant="outlined"
-                        onClick={toggleJoinRoom}
-                        startIcon={
-                          isLoading && (
-                            <CircularProgress size={20} color="inherit" />
-                          )
-                        }
-                      >
-                        Bidding
-                      </Button>
-                    </Countdown>
+                    <Box>
+                      <Typography>Bid after: </Typography>
+                      <Countdown date={currentRoom.start_time * 1000}>
+                        <Button
+                          variant="outlined"
+                          onClick={toggleJoinRoom}
+                          startIcon={
+                            isLoading && (
+                              <CircularProgress size={20} color="inherit" />
+                            )
+                          }
+                        >
+                          Bidding
+                        </Button>
+                      </Countdown>
+                    </Box>
                   )}
                 </Box>
               </Box>

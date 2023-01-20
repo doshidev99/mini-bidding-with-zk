@@ -31,7 +31,9 @@ const CloseRoom = ({ open, toggle }) => {
       await zkApi.closeRoom({
         room_id: +formValues.roomId,
       });
+
       toast.success("Room closed successfully");
+      await zkApi.getResultByRoom({ room_id: +formValues.roomId });
       toggle();
     } catch (e) {
       toast.error(e.message);
