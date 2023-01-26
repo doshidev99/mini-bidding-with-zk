@@ -62,20 +62,15 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
       .then(async ([proofId, bid_data]) => {
         updateProofId(proofId);
         updateBidData(bid_data);
-        const dataSave = {
-          room_id: roomId,
-          email: formValues.email,
-          private_code: formValues.code,
-          bid_data,
-          proofId,
-        };
-
         const payload = {
           room_id: roomId,
-          proof_id: proofId,
-          bid_data,
+          proof_id: proofId.proof,
+          bid_data: {
+            inputs: bid_data.inputs,
+            proof: bid_data.proof,
+          },
+          encrypted_data: bid_data.fake_encrypted_data,
         };
-        LocalStorage.set("proof", dataSave);
         await zkApi.bidding(payload);
         toast.success("Join room and bidding successfully");
         toggle();

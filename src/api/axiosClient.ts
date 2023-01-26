@@ -53,6 +53,10 @@ const getInstance = (baseURL: string) => {
       return response.data;
     },
     async function (error) {
+      const { status } = error.response;
+      if (status == 401) {
+        handleLogout();
+      }
       return Promise.reject(error.response?.data);
     }
   );
