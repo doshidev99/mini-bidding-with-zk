@@ -4,6 +4,7 @@ import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
 import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
 import OpenRoom from "@components/AppModal/OpenRoom";
 import UpdateDuration from "@components/AppModal/UpdateDuration";
+import ListUserBidding from "@components/ListUserBidding";
 import ResultRoomTable from "@components/ResultRoomTable";
 import WhiteListTable from "@components/WhiteListTable";
 import { useToggle } from "@hooks/useToggle";
@@ -14,11 +15,12 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
+import { useDetailInRoom } from "@services/roomService";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import { LocalStorage } from "@utils/newLocalstorage";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Countdown from "react-countdown";
 import { toast } from "react-hot-toast";
 
@@ -30,9 +32,7 @@ const RoomDetail = () => {
   const [openJoinRoom, toggleJoinRoom] = useToggle();
   const [openAddWhiteList, toggleAddWhiteList] = useToggle();
 
-  const [openResult, toggleResult] = useToggle();
-  const { bid_data, proof_id, updateDetailRoom, currentRoom } =
-    useStoreDataRoom();
+  const { bid_data, proof_id } = useStoreDataRoom();
 
   const [isLoading, setIsLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -41,30 +41,18 @@ const RoomDetail = () => {
   const [openDuration, toggleDuration] = useToggle();
   const [closeRoom, toggleCloseRoom] = useToggle();
 
-  useEffect(() => {
-    const getRoomDetail = async () => {
-      if (!query.id) return;
-      setFetching(true);
-      try {
-        const _data = await zkApi.getRoomById(query.id);
-        updateDetailRoom(_data);
-      } catch (e) {}
-      setFetching(false);
-    };
+  const { data } = useDetailInRoom([open, closeRoom]);
 
-    getRoomDetail();
-  }, [query.id, updateDetailRoom, open, closeRoom]);
+  const currentRoom = useMemo(() => {
+    return data && data.roomDetail;
+  }, [data]);
 
-  const timeCountDown = useMemo(
-    () =>
-      currentRoom
-        ? currentRoom.start_time * 1000 + currentRoom.duration_time * 1000
-        : 0,
-    [currentRoom]
-  );
+  const userBiddingInRoom = useMemo(() => {
+    return data && data.userBiddingInRoom;
+  }, [data]);
 
   const renderComponent = () => {
-    if (currentRoom?.status == "ready") {
+    if (currentTab == 1 && currentRoom?.status == "ready") {
       return (
         <Box pt={3} className="vault-content">
           <Button
@@ -148,7 +136,11 @@ const RoomDetail = () => {
     <div className="container">
       <OpenRoom open={open} toggle={toggle} />
       <CloseRoom open={closeRoom} toggle={toggleCloseRoom} />
-      <UpdateDuration open={openDuration} toggle={toggleDuration} />
+      <UpdateDuration
+        open={openDuration}
+        toggle={toggleDuration}
+        duration={currentRoom?.duration_time}
+      />
 
       <ModalJoinRoom
         open={openJoinRoom}
@@ -179,14 +171,16 @@ const RoomDetail = () => {
                           >
                             Action..
                           </Box>
-                          <Box
-                            onClick={() => setCurrentTab(2)}
-                            className={`vault-tab ${
-                              currentTab == 2 && "active"
-                            } `}
-                          >
-                            Update duration
-                          </Box>
+                          {currentRoom?.status == "ready" && (
+                            <Box
+                              onClick={() => setCurrentTab(2)}
+                              className={`vault-tab ${
+                                currentTab == 2 && "active"
+                              } `}
+                            >
+                              Update duration
+                            </Box>
+                          )}
                         </Box>
                         {renderComponent()}
                       </div>
@@ -322,7 +316,7 @@ const RoomDetail = () => {
                             )
                           }
                         >
-                          Bidding
+                          Join room
                         </Button>
                       </Countdown>
                     </Box>
@@ -357,6 +351,9 @@ const RoomDetail = () => {
             </>
           )}
         </div>
+      </Box>
+      <Box my={2}>
+        <ListUserBidding />
       </Box>
     </div>
   );

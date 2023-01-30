@@ -1,5 +1,6 @@
 import { zkApi } from "@api/zkApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 
 export const useRoomService = (id?: number) => {
@@ -45,5 +46,41 @@ export const useRoomService = (id?: number) => {
     refetch,
     data,
     isLoading,
+  };
+};
+
+export const useDetailInRoom = (dependencies?: any[]) => {
+  const { query } = useRouter();
+
+  const queryKey = "room-detail";
+
+  const { refetch, data, isLoading } = useQuery({
+    queryKey: [queryKey, query?.id, ...[dependencies || []]],
+    queryFn: async () => {
+      if (!query?.id)
+        return {
+          userBiddingInRoom: null,
+          roomDetail: null,
+        };
+      const roomId = query.id;
+      const data = await Promise.all([
+        zkApi.getBiddingUserInRoom(roomId),
+        zkApi.getRoomById(roomId),
+      ]).then(([userBiddingInRoom, roomDetail]) => {
+        return {
+          userBiddingInRoom,
+          roomDetail,
+        };
+      });
+      return data;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 10000,
+  });
+
+  return {
+    data,
+    isLoading,
+    refetch,
   };
 };

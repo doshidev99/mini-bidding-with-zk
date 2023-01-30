@@ -3,6 +3,7 @@ import BamInput from "@components/Form/BamInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import { useDetailInRoom } from "@services/roomService";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -14,6 +15,8 @@ const schema = yup.object().shape({
 
 const OpenRoom = ({ open, toggle }) => {
   const { query } = useRouter();
+  const { refetch } = useDetailInRoom();
+
   const {
     handleSubmit,
     control,
@@ -36,6 +39,7 @@ const OpenRoom = ({ open, toggle }) => {
       });
       toast.success("Room opened successfully");
       toggle();
+      refetch();
     } catch (e) {
       toast.error(e.message);
     }

@@ -9,7 +9,7 @@ import {
   Modal,
   Typography,
 } from "@mui/material";
-import { useRoomService } from "@services/roomService";
+import { useDetailInRoom, useRoomService } from "@services/roomService";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -17,9 +17,10 @@ import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
 const ModalAddWhiteList = ({ open, toggle }) => {
-  const { refetch, data: roomList, isLoading } = useRoomService();
+  const { data: roomList, isLoading } = useRoomService();
   const [submitting, onSubmitting] = useState(false);
   const { updateDetailRoom } = useStoreDataRoom();
+  const { refetch } = useDetailInRoom();
 
   const schema = yup.object().shape({
     store: yup.array().of(

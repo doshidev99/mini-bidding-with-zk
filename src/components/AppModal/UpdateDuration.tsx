@@ -13,7 +13,7 @@ const schema = yup.object().shape({
   duration_time: yup.number().required("Duration time is required"),
 });
 
-const UpdateDuration = ({ open, toggle }) => {
+const UpdateDuration = ({ open, toggle, duration }) => {
   const { query } = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +54,7 @@ const UpdateDuration = ({ open, toggle }) => {
         <Box sx={style}>
           <Typography textAlign={"center"} pb={2} variant="subtitle1">
             Update duration
+            <Typography fontSize={"13px"}>Current Duration : {duration}</Typography>
           </Typography>
 
           <BamInput

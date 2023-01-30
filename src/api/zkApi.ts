@@ -1,6 +1,15 @@
 import axiosInstance from "./axiosClient";
 
 export const zkApi = {
+  async getBiddingUserInRoom(room_id): Promise<any> {
+    const res = await axiosInstance.get("/bidding/user-in-room", {
+      params: {
+        room_id,
+      },
+    });
+    return res;
+  },
+
   async getRoom(): Promise<any> {
     const res = await axiosInstance.get("/rooms", {
       params: {
