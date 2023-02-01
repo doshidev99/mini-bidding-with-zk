@@ -20,8 +20,4 @@ const AuthGuard = ({ children }) => {
   );
 };
 
-const AuthDisplayComponent = ({ children }) => {
-  return <>{children}</>;
-};
-
 export default AuthGuard;

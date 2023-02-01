@@ -8,12 +8,14 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { useProfileService } from "@services/profileService";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 const AppHeader = () => {
+  useProfileService();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {

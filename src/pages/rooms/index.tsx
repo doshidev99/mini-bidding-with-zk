@@ -2,9 +2,10 @@ import ModalCreateRoom from "@components/AppModal/ModalCreateRoom";
 import { useToggle } from "@hooks/useToggle";
 import { Box, Button, Chip, Skeleton, Typography } from "@mui/material";
 import { useRoomService } from "@services/roomService";
+import { generateKeyPair } from "@utils/configOpenpgp";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Countdown from "react-countdown";
 import * as yup from "yup";
 
@@ -19,6 +20,10 @@ const Rooms = () => {
   const [currentRoomId, setCurrentRoomId] = useState();
   const [openAddWhiteList, toggleAddWhiteList] = useToggle();
   const [openCreate, toggleCreate] = useToggle();
+
+  useEffect(() => {
+    generateKeyPair();
+  }, []);
 
   if (isLoading)
     return (

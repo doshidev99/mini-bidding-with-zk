@@ -1,6 +1,11 @@
 import axiosInstance from "./axiosClient";
 
 export const zkApi = {
+  async getProfile(): Promise<any> {
+    const res = await axiosInstance.get("/me");
+    return res;
+  },
+
   async getBiddingUserInRoom(room_id): Promise<any> {
     const res = await axiosInstance.get("/bidding/user-in-room", {
       params: {
@@ -11,7 +16,16 @@ export const zkApi = {
   },
 
   async getRoom(): Promise<any> {
-    const res = await axiosInstance.get("/rooms", {
+    const res = await axiosInstance.get("/rooms/list", {
+      params: {
+        limit: 100,
+      },
+    });
+    return res;
+  },
+
+  async getMyRoom(): Promise<any> {
+    const res = await axiosInstance.get("/rooms/creator", {
       params: {
         limit: 100,
       },

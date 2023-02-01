@@ -1,4 +1,3 @@
-import { zkApi } from "@api/zkApi";
 import CloseRoom from "@components/AppModal/CloseRoom";
 import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
 import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
@@ -17,12 +16,11 @@ import {
 } from "@mui/material";
 import { useDetailInRoom } from "@services/roomService";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
-import { LocalStorage } from "@utils/newLocalstorage";
+import { useStoreProfile } from "@store/useStoreProfile";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import Countdown from "react-countdown";
-import { toast } from "react-hot-toast";
 
 const RoomDetail = () => {
   const { query } = useRouter();
@@ -31,8 +29,7 @@ const RoomDetail = () => {
   const [isOpen, onOpen] = useToggle(true);
   const [openJoinRoom, toggleJoinRoom] = useToggle();
   const [openAddWhiteList, toggleAddWhiteList] = useToggle();
-
-  const { bid_data, proof_id } = useStoreDataRoom();
+  const { profile } = useStoreProfile();
 
   const [isLoading, setIsLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -41,15 +38,15 @@ const RoomDetail = () => {
   const [openDuration, toggleDuration] = useToggle();
   const [closeRoom, toggleCloseRoom] = useToggle();
 
-  const { data } = useDetailInRoom([open, closeRoom]);
+  const { data } = useDetailInRoom([open, closeRoom, openAddWhiteList]);
 
   const currentRoom = useMemo(() => {
     return data && data.roomDetail;
   }, [data]);
 
-  const userBiddingInRoom = useMemo(() => {
-    return data && data.userBiddingInRoom;
-  }, [data]);
+  const userIsBidding = useMemo(() => {
+    return data && profile && data.keyByUserBidding.includes(profile.auth_user);
+  }, [data, profile]);
 
   const renderComponent = () => {
     if (currentTab == 1 && currentRoom?.status == "ready") {
@@ -105,7 +102,7 @@ const RoomDetail = () => {
         return (
           <Box className="vault-content">
             <Box>
-              {currentRoom?.whitelist.length > 0 && (
+              {currentRoom?.whitelist?.length > 0 && (
                 <WhiteListTable whiteList={currentRoom?.whitelist || []} />
               )}
             </Box>
@@ -114,23 +111,7 @@ const RoomDetail = () => {
     }
   };
 
-  const onBidding = async () => {
-    const localData = LocalStorage.get("proof");
-    const payload = {
-      room_id: +query.id,
-      proof_id: proof_id || localData.proofId,
-      bid_data: bid_data || localData.bid_data,
-    };
-
-    try {
-      setIsLoading(true);
-      await zkApi.bidding(payload);
-      toast.success("Bidding successfully!");
-    } catch (e) {
-      toast.error(e.message);
-    }
-    setIsLoading(false);
-  };
+  console.log(profile, "profile");
 
   return (
     <div className="container">
@@ -148,6 +129,7 @@ const RoomDetail = () => {
         roomId={+query.id}
       />
       <ModalAddWhiteList open={openAddWhiteList} toggle={toggleAddWhiteList} />
+
       <Box display={"flex"} gap={2}>
         <div className="box-contributor">
           {fetching && !currentRoom ? (
@@ -274,78 +256,85 @@ const RoomDetail = () => {
                   height={200}
                 />
               </div>
-              <Box pb={2} textAlign="center">
-                <Box
-                  sx={{
-                    margin: "0 auto",
-                    paddingTop: 4,
-                  }}
-                >
-                  {currentRoom?.tree_id != 0 ? (
-                    <Box>
-                      <Box>
-                        {currentRoom?.status == "ready" && (
-                          <Typography color={"secondary"}>
-                            Waiting room to open...
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  ) : (
-                    <Button
-                      color="primary"
-                      variant="outlined"
-                      onClick={toggleAddWhiteList}
-                    >
-                      Add white list
-                    </Button>
-                  )}
-                </Box>
 
-                <Box textAlign={"center"} pt={2}>
-                  {currentRoom?.status == "open" && (
-                    <Box>
-                      <Typography>Bid after: </Typography>
-                      <Countdown date={currentRoom.start_time * 1000}>
+              {userIsBidding ? (
+                <Typography textAlign={"center"}>User Bided</Typography>
+              ) : (
+                <>
+                  <Box pb={2} textAlign="center">
+                    <Box
+                      sx={{
+                        margin: "0 auto",
+                        paddingTop: 4,
+                      }}
+                    >
+                      {currentRoom?.tree_id != 0 ? (
+                        <Box>
+                          <Box>
+                            {currentRoom?.status == "ready" && (
+                              <Typography color={"secondary"}>
+                                Waiting room to open...
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      ) : (
                         <Button
+                          color="primary"
                           variant="outlined"
-                          onClick={toggleJoinRoom}
-                          startIcon={
-                            isLoading && (
-                              <CircularProgress size={20} color="inherit" />
-                            )
-                          }
+                          onClick={toggleAddWhiteList}
                         >
-                          Join room
+                          Add white list
                         </Button>
+                      )}
+                    </Box>
+
+                    <Box textAlign={"center"} pt={2}>
+                      {currentRoom?.status == "open" && (
+                        <Box>
+                          <Typography>Bid after: </Typography>
+                          <Countdown date={currentRoom.start_time * 1000}>
+                            <Button
+                              variant="outlined"
+                              onClick={toggleJoinRoom}
+                              startIcon={
+                                isLoading && (
+                                  <CircularProgress size={20} color="inherit" />
+                                )
+                              }
+                            >
+                              Join room
+                            </Button>
+                          </Countdown>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+
+                  {currentRoom?.status == "open" && (
+                    <Box textAlign={"center"}>
+                      <Typography>Room close after: </Typography>
+                      <Countdown
+                        date={
+                          currentRoom.start_time * 1000 +
+                          currentRoom.duration_time * 1000
+                        }
+                      >
+                        <Box pt={3} className="vault-content">
+                          <Button
+                            sx={{
+                              minWidth: 170,
+                            }}
+                            variant="outlined"
+                            onClick={toggleCloseRoom}
+                          >
+                            Close room
+                          </Button>
+                        </Box>
                       </Countdown>
                     </Box>
                   )}
-                </Box>
-              </Box>
-
-              {currentRoom?.status == "open" && (
-                <Box textAlign={"center"}>
-                  <Typography>Room close after: </Typography>
-                  <Countdown
-                    date={
-                      currentRoom.start_time * 1000 +
-                      currentRoom.duration_time * 1000
-                    }
-                  >
-                    <Box pt={3} className="vault-content">
-                      <Button
-                        sx={{
-                          minWidth: 170,
-                        }}
-                        variant="outlined"
-                        onClick={toggleCloseRoom}
-                      >
-                        Close room
-                      </Button>
-                    </Box>
-                  </Countdown>
-                </Box>
+                </>
               )}
               {/* <div className="text-center">ENS Supporter ZK Badge</div> */}
             </>

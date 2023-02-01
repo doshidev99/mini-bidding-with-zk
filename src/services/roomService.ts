@@ -1,5 +1,6 @@
 import { zkApi } from "@api/zkApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keyBy } from "lodash-es";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 
@@ -61,6 +62,7 @@ export const useDetailInRoom = (dependencies?: any[]) => {
         return {
           userBiddingInRoom: null,
           roomDetail: null,
+          keyByUserBidding: [],
         };
       const roomId = query.id;
       const data = await Promise.all([
@@ -70,6 +72,7 @@ export const useDetailInRoom = (dependencies?: any[]) => {
         return {
           userBiddingInRoom,
           roomDetail,
+          keyByUserBidding: Object.keys(keyBy(userBiddingInRoom, "user")),
         };
       });
       return data;
