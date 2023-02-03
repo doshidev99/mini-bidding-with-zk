@@ -3,6 +3,8 @@ import BamInput from "@components/Form/BamInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import { useDetailInRoom } from "@services/roomService";
+import { useStoreDataInRoom } from "@store/useStoreDataInRoom";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,8 +15,11 @@ const schema = yup.object().shape({
   duration_time: yup.number().required("Duration time is required"),
 });
 
-const UpdateDuration = ({ open, toggle, duration }) => {
+const UpdateDuration = ({ open, toggle }) => {
   const { query } = useRouter();
+  const { refetch } = useDetailInRoom();
+
+  const { currentRoom } = useStoreDataInRoom();
 
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -25,9 +30,7 @@ const UpdateDuration = ({ open, toggle, duration }) => {
     duration_time: number;
   }>({
     resolver: yupResolver(schema),
-    defaultValues: {
-      duration_time: 30,
-    },
+    defaultValues: {},
     mode: "onChange",
   });
 
@@ -39,6 +42,7 @@ const UpdateDuration = ({ open, toggle, duration }) => {
         duration_time: +formValues.duration_time,
       });
 
+      refetch();
       toast.success("Update duration time successfully");
       // await zkApi.getResultByRoom({ room_id: +formValues.roomId });
       toggle();
@@ -54,7 +58,9 @@ const UpdateDuration = ({ open, toggle, duration }) => {
         <Box sx={style}>
           <Typography textAlign={"center"} pb={2} variant="subtitle1">
             Update duration
-            <Typography fontSize={"13px"}>Current Duration : {duration}</Typography>
+            <Typography fontSize={"13px"}>
+              Current Duration : {currentRoom?.duration_time * 1000}s
+            </Typography>
           </Typography>
 
           <BamInput

@@ -1,15 +1,11 @@
-import { zkApi } from "@api/zkApi";
 import BamInput from "@components/Form/BamInput";
 import UnstyledInputBasic from "@components/Form/CustomInput";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useToggle } from "@hooks/useToggle";
 import { Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRoomService } from "@services/roomService";
-import { randomInfo } from "@utils/generatorData";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
@@ -43,11 +39,11 @@ const ModalCreateRoom = ({ open, toggle }) => {
   }>({
     resolver: yupResolver(schema),
     defaultValues: {
-      name: randomInfo().name,
+      name: "",
       info: {
-        description: randomInfo().description,
-        website: randomInfo().website,
-        phone: randomInfo().phone,
+        description: "",
+        website: "",
+        phone: "",
       },
     },
     mode: "onChange",
@@ -83,7 +79,6 @@ const ModalCreateRoom = ({ open, toggle }) => {
               label="Room name"
               name="name"
               placeholder="Enter your room name"
-              value={randomInfo().name}
               rules={{ required: true }}
               error={errors.name}
               autoFocus={true}
@@ -95,7 +90,6 @@ const ModalCreateRoom = ({ open, toggle }) => {
               name="info.website"
               placeholder="Enter your room's website"
               rules={{ required: true }}
-              value={randomInfo().website}
               error={errors.info?.website}
               autoFocus={true}
             />
@@ -105,7 +99,6 @@ const ModalCreateRoom = ({ open, toggle }) => {
               label="Phone number"
               name="info.phone"
               placeholder="Enter your room's phone number"
-              value={randomInfo().phone}
               rules={{ required: true }}
               error={errors.info?.phone}
               autoFocus={true}
@@ -123,7 +116,6 @@ const ModalCreateRoom = ({ open, toggle }) => {
 
             <UnstyledInputBasic
               label="Description"
-              value={randomInfo().description}
               onChange={(e) => setValue("info.description", e.target.value)}
             />
 

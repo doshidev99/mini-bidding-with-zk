@@ -9,10 +9,11 @@ import {
   Modal,
   Typography,
 } from "@mui/material";
-import { useDetailInRoom } from "@services/roomService";
+import { useRoomService } from "@services/roomService";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import { useStoreProfile } from "@store/useStoreProfile";
 import { LocalStorage } from "@utils/newLocalstorage";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -21,12 +22,16 @@ import * as yup from "yup";
 const schema = yup.object().shape({
   code: yup.string().required(),
   email: yup.string().required(),
+  roomId: yup.number().required(),
 });
 
-const ModalJoinRoom = ({ open, toggle, roomId }) => {
+const ModalUserJoinRoom = ({ open, toggle }) => {
+  const router = useRouter();
   const [joining, onJoining] = useState(false);
   const [openBid, toggleBid] = useToggle(false);
   const { updateProofId } = useStoreDataRoom();
+  const { refetch } = useRoomService();
+
   const { profile } = useStoreProfile();
 
   const {
@@ -36,6 +41,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
   } = useForm<{
     code: string;
     email: string;
+    roomId: string;
   }>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -48,61 +54,32 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
   const onSubmit = async (formValues) => {
     onJoining(true);
     const payload = {
-      room_id: roomId,
+      room_id: formValues.roomId,
       email: formValues.email,
       private_code: formValues.code,
     };
     try {
       const proofId = await zkApi.joinRoom(payload);
-      updateProofId(proofId);
-      const dataSaveToStorage = {
-        [profile.auth_user + roomId]: {
-          proofId,
-          payload,
+      const dataGuestSave = {
+        [profile.auth_user]: {
+          [formValues.roomId]: {
+            proofId,
+            payload,
+          },
         },
       };
 
-      console.log("dataSaveToStorage", dataSaveToStorage);
-      LocalStorage.set("dataSaveToStorage", dataSaveToStorage);
+      updateProofId(proofId);
+      LocalStorage.set("dataGuestSave", dataGuestSave);
+      refetch();
       toast.success("Join room successfully");
-      toggleBid();
       toggle();
+      router.push(`/guest-rooms/${formValues.roomId}`);
     } catch (e) {
       toast.error(e.message);
     } finally {
       onJoining(false);
     }
-
-    // Promise.all([
-    //   zkApi.joinRoom(payload),
-    //   // zkApi.joinBidding({
-    //   //   ...payload,
-    //   //   bid_value: +formValues.bidValue,
-    //   // }),
-    // ])
-    //   .then(async ([proofId, bid_data]) => {
-    //     console.log("proofId", proofId);
-
-    //     // updateBidData(bid_data);
-    //     // const payload = {
-    //     //   room_id: roomId,
-    //     //   proof_id: proofId.proof,
-    //     //   bid_data: {
-    //     //     inputs: bid_data.inputs,
-    //     //     proof: bid_data.proof,
-    //     //   },
-    //     //   encrypted_data: bid_data.fake_encrypted_data,
-    //     // };
-    //     // await zkApi.bidding(payload);
-    //     toast.success("Join room successfully");
-    //     // toggle();
-    //   })
-    //   .catch((e) => {
-    //     toast.error(e.message);
-    //   })
-    //   .finally(() => {
-    //     onJoining(false);
-    //   });
   };
 
   return (
@@ -112,7 +89,6 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
           <Box sx={style}>
             <Typography variant="subtitle1">
               Please enter private code to join the room:
-              {roomId}
             </Typography>
             <BamInput
               control={control}
@@ -134,6 +110,16 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
               autoFocus={true}
             />
 
+            <BamInput
+              control={control}
+              label="Room ID"
+              name="roomId"
+              placeholder="Enter room ID"
+              rules={{ required: true }}
+              error={errors.code}
+              autoFocus={true}
+            />
+
             <Box textAlign={"center"} mt={3}>
               <Button
                 startIcon={
@@ -150,7 +136,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
         </Box>
       </Modal>
 
-      <ModalBidding open={openBid} toggle={toggleBid} roomId={roomId} />
+      <ModalUserBidding open={openBid} toggle={toggleBid} />
     </div>
   );
 };
@@ -169,12 +155,10 @@ const style = {
   p: 4,
 };
 
-export const ModalBidding = ({ open, toggle, roomId }) => {
+export const ModalUserBidding = ({ open, toggle }) => {
   const [isBidding, setIsBidding] = useState(false);
-  const { refetch } = useDetailInRoom();
-
   const { profile } = useStoreProfile();
-
+  const { query } = useRouter();
   const {
     handleSubmit,
     control,
@@ -194,14 +178,16 @@ export const ModalBidding = ({ open, toggle, roomId }) => {
   const onBidding = async (formValues) => {
     setIsBidding(true);
     try {
-      const prevPayload = LocalStorage.get("dataSaveToStorage");
-      const _dataJoinRoomByProfile = prevPayload[profile.auth_user + roomId];
+      const _roomHasInvites = LocalStorage.get("dataGuestSave");
+      if (!_roomHasInvites) return;
+      const _dataJoinRoomByProfile =
+        _roomHasInvites[profile.auth_user]?.[query?.id as string];
       const bid_data = await zkApi.joinBidding({
         ..._dataJoinRoomByProfile.payload,
         bid_value: +formValues.bidValue,
       });
       const payload = {
-        room_id: +roomId,
+        room_id: +query.id,
         proof_id: _dataJoinRoomByProfile.proofId.proof,
         bid_data: {
           inputs: bid_data.inputs,
@@ -210,7 +196,6 @@ export const ModalBidding = ({ open, toggle, roomId }) => {
         encrypted_data: bid_data.fake_encrypted_data,
       };
       await zkApi.bidding(payload);
-      refetch();
       toast.success("Bidding successfully");
       toggle();
     } catch (e) {
@@ -224,10 +209,7 @@ export const ModalBidding = ({ open, toggle, roomId }) => {
     <Modal open={open} onClose={toggle}>
       <Box>
         <Box sx={style}>
-          <Typography variant="subtitle1">
-            Bidding room:
-            {roomId && roomId}
-          </Typography>
+          <Typography variant="subtitle1">Bidding room:</Typography>
 
           <BamInput
             control={control}
@@ -257,4 +239,4 @@ export const ModalBidding = ({ open, toggle, roomId }) => {
   );
 };
 
-export default ModalJoinRoom;
+export default ModalUserJoinRoom;

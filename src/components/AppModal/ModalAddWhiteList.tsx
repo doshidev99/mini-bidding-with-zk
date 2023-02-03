@@ -10,7 +10,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useDetailInRoom, useRoomService } from "@services/roomService";
-import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -19,7 +18,6 @@ import * as yup from "yup";
 const ModalAddWhiteList = ({ open, toggle }) => {
   const { data: roomList, isLoading } = useRoomService();
   const [submitting, onSubmitting] = useState(false);
-  const { updateDetailRoom } = useStoreDataRoom();
   const { refetch } = useDetailInRoom();
 
   const schema = yup.object().shape({
@@ -51,7 +49,7 @@ const ModalAddWhiteList = ({ open, toggle }) => {
     mode: "onChange",
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append } = useFieldArray({
     name: "store",
     control,
   });
@@ -66,9 +64,7 @@ const ModalAddWhiteList = ({ open, toggle }) => {
     try {
       await zkApi.importWhiteList(payload);
       refetch();
-      toast.success("Import whitelist success");
-      const _data = await zkApi.getRoomById(formValues.roomId);
-      updateDetailRoom(_data);
+      toast.success("Add whitelist success");
     } catch (e) {
       console.log(e);
     } finally {

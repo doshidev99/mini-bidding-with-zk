@@ -8,14 +8,12 @@ import * as React from "react";
 export default function WhiteListTable({ whiteList }) {
   return (
     <Box>
+      <Typography>White List:</Typography>
       <List sx={{ width: "100%", borderRadius: 5 }}>
         {whiteList?.map((item, idx) => {
           return (
             <>
               <ListItem key={idx} alignItems="flex-start">
-                {/* <ListItemAvatar>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-                </ListItemAvatar> */}
                 <ListItemText
                   primary={item.data.user}
                   secondary={

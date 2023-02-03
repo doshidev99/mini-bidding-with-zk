@@ -8,14 +8,14 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useDetailInRoom } from "@services/roomService";
 
-export default function ListUserBidding() {
-  const { data } = useDetailInRoom();
+export default function ListUserBidding({ currentResult }) {
+  // const { data } = useDetailInRoom();
 
-  const userBiddingInRoom = React.useMemo(() => {
-    return data && data.userBiddingInRoom;
-  }, [data]);
+  // const userBiddingInRoom = React.useMemo(() => {
+  //   return data && data.userBiddingInRoom;
+  // }, [data, data?.userBiddingInRoom?.length]);
 
-  if (!userBiddingInRoom?.length) return null;
+  if (!currentResult?.length) return null;
   return (
     <TableContainer component={Paper}>
       <Table
@@ -26,16 +26,24 @@ export default function ListUserBidding() {
         <TableHead>
           <TableRow>
             <TableCell>Bidder</TableCell>
+            <TableCell>User</TableCell>
+            <TableCell>Price</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {userBiddingInRoom?.map((row, idx) => (
+          {currentResult?.map((row, idx) => (
             <TableRow
               key={idx}
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
                 {row.bidder}
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {row.user}
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {row.price}
               </TableCell>
             </TableRow>
           ))}

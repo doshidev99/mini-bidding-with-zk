@@ -1,22 +1,16 @@
-import CloseRoom from "@components/AppModal/CloseRoom";
-import ModalAddWhiteList from "@components/AppModal/ModalAddWhiteList";
-import ModalJoinRoom from "@components/AppModal/ModalJoinRoom";
-import OpenRoom from "@components/AppModal/OpenRoom";
-import UpdateDuration from "@components/AppModal/UpdateDuration";
+import ModalJoinRoom, {
+  ModalBidding,
+} from "@components/AppModal/ModalJoinRoom";
 import ListUserBidding from "@components/ListUserBidding";
-import ResultRoomTable from "@components/ResultRoomTable";
-import WhiteListTable from "@components/WhiteListTable";
 import { useToggle } from "@hooks/useToggle";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Skeleton,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Skeleton, Typography } from "@mui/material";
 import { useDetailInRoom } from "@services/roomService";
-import { useStoreDataRoom } from "@store/useStoreDataRoom";
+import { useStoreDataInRoom } from "@store/useStoreDataInRoom";
+import { useStoreModal } from "@store/useStoreModal";
 import { useStoreProfile } from "@store/useStoreProfile";
+import { LocalStorage } from "@utils/newLocalstorage";
+import WhiteListInRoom from "@views/DetailRoom/components/WhiteListInRoom";
+import { keys } from "lodash-es";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
@@ -24,115 +18,46 @@ import Countdown from "react-countdown";
 
 const RoomDetail = () => {
   const { query } = useRouter();
-  const [currentTab, setCurrentTab] = useState(1);
-  const [currenTabLeft, setCurrentTabLeft] = useState(1);
-  const [isOpen, onOpen] = useToggle(true);
+  const [isOpen, onOpen] = useToggle();
   const [openJoinRoom, toggleJoinRoom] = useToggle();
-  const [openAddWhiteList, toggleAddWhiteList] = useToggle();
+  const [openBidding, toggleBidding] = useToggle();
+
+  useDetailInRoom();
+
+  const {
+    toggleOpenAddWhiteList,
+    toggleOpenUpdateDurationTime,
+    toggleOpenRoom,
+    toggleCloseRoom,
+  } = useStoreModal();
   const { profile } = useStoreProfile();
+  const { isLoadingDetailInRoom, currentRoom, isOwner } = useStoreDataInRoom();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
-
-  const [open, toggle] = useToggle();
-  const [openDuration, toggleDuration] = useToggle();
-  const [closeRoom, toggleCloseRoom] = useToggle();
-
-  const { data } = useDetailInRoom([open, closeRoom, openAddWhiteList]);
-
-  const currentRoom = useMemo(() => {
-    return data && data.roomDetail;
-  }, [data]);
-
-  const userIsBidding = useMemo(() => {
-    return data && profile && data.keyByUserBidding.includes(profile.auth_user);
-  }, [data, profile]);
-
-  const renderComponent = () => {
-    if (currentTab == 1 && currentRoom?.status == "ready") {
-      return (
-        <Box pt={3} className="vault-content">
-          <Button
-            sx={{
-              minWidth: 170,
-            }}
-            variant="outlined"
-            onClick={toggle}
-          >
-            Open room
-          </Button>
-        </Box>
-      );
-    }
-
-    if (currentRoom?.status == "close") {
-      return (
-        <Box pt={3} className="vault-content">
-          {currentRoom?.result?.length > 0 ? (
-            <ResultRoomTable currentResult={currentRoom.result || []} />
-          ) : (
-            <Typography fontSize={14}>
-              There is no result for this room yet. Please wait for the
-            </Typography>
-          )}
-        </Box>
-      );
-    }
-
-    if (currentTab == 2) {
-      return (
-        <Box pt={3} className="vault-content">
-          <Button
-            sx={{
-              minWidth: 170,
-            }}
-            variant="outlined"
-            onClick={toggleDuration}
-          >
-            Update duration
-          </Button>
-        </Box>
-      );
-    }
-  };
-
-  const renderComponent2 = () => {
-    switch (currenTabLeft) {
-      case 1:
-        return (
-          <Box className="vault-content">
-            <Box>
-              {currentRoom?.whitelist?.length > 0 && (
-                <WhiteListTable whiteList={currentRoom?.whitelist || []} />
-              )}
-            </Box>
-          </Box>
-        );
-    }
-  };
-
-  console.log(profile, "profile");
+  const isJoinRoom = useMemo(() => {
+    const _prevDataJoinRoom = LocalStorage.get("dataSaveToStorage");
+    return (
+      _prevDataJoinRoom &&
+      profile &&
+      keys(_prevDataJoinRoom).includes(profile.auth_user + query.id)
+    );
+  }, [profile, query.id]);
 
   return (
     <div className="container">
-      <OpenRoom open={open} toggle={toggle} />
-      <CloseRoom open={closeRoom} toggle={toggleCloseRoom} />
-      <UpdateDuration
-        open={openDuration}
-        toggle={toggleDuration}
-        duration={currentRoom?.duration_time}
-      />
-
       <ModalJoinRoom
         open={openJoinRoom}
         toggle={toggleJoinRoom}
         roomId={+query.id}
       />
-      <ModalAddWhiteList open={openAddWhiteList} toggle={toggleAddWhiteList} />
 
-      <Box display={"flex"} gap={2}>
-        <div className="box-contributor">
-          {fetching && !currentRoom ? (
+      <Box display={"flex"} alignItems="flex-start" gap={2}>
+        <Box
+          className="box-contributor"
+          sx={{
+            minWidth: 300,
+          }}
+        >
+          {isLoadingDetailInRoom ? (
             <Skeleton height={"100%"} />
           ) : (
             <>
@@ -140,33 +65,6 @@ const RoomDetail = () => {
                 {currentRoom?.tree_id != 0 && (
                   <div className={`box-vault ${isOpen && "open"}`}>
                     <Box>
-                      <Box pt={2} pl={2}>
-                        Room Action
-                      </Box>
-                      <div>
-                        <Box display={"flex"} pt={4}>
-                          <Box
-                            onClick={() => setCurrentTab(1)}
-                            className={`vault-tab ${
-                              currentTab == 1 && "active"
-                            } `}
-                          >
-                            Action..
-                          </Box>
-                          {currentRoom?.status == "ready" && (
-                            <Box
-                              onClick={() => setCurrentTab(2)}
-                              className={`vault-tab ${
-                                currentTab == 2 && "active"
-                              } `}
-                            >
-                              Update duration
-                            </Box>
-                          )}
-                        </Box>
-                        {renderComponent()}
-                      </div>
-
                       <div
                         className={`vault-transform`}
                         onClick={onOpen}
@@ -199,41 +97,6 @@ const RoomDetail = () => {
                 )}
               </div>
 
-              {currentRoom?.tree_id != 0 && (
-                <>
-                  <div className="box-vault-flex">
-                    <div className={`box-vault left ${isOpen && "open"}`}>
-                      <Box>
-                        <div>
-                          <Box display={"flex"}>
-                            <Box
-                              onClick={() => setCurrentTabLeft(1)}
-                              className={`vault-tab ${
-                                currenTabLeft == 1 && "active"
-                              } `}
-                            >
-                              White list
-                            </Box>
-                          </Box>
-                          {renderComponent2()}
-                        </div>
-                      </Box>
-                    </div>
-                    {!isOpen && (
-                      <div className={`vault-transform`} onClick={onOpen}>
-                        <Image
-                          className={`vault-transform__img ${isOpen && "open"}`}
-                          src={"/assets/img/arrow.svg"}
-                          alt="Sismo"
-                          width={14}
-                          height={14}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
               <div>
                 <div className="text-left">
                   <span
@@ -248,6 +111,7 @@ const RoomDetail = () => {
                   {currentRoom?.id}
                 </div>
               </div>
+
               <div className="box-card__img">
                 <Image
                   src={"/assets/img/badge.svg"}
@@ -257,7 +121,7 @@ const RoomDetail = () => {
                 />
               </div>
 
-              {userIsBidding ? (
+              {false ? (
                 <Typography textAlign={"center"}>User Bided</Typography>
               ) : (
                 <>
@@ -268,81 +132,134 @@ const RoomDetail = () => {
                         paddingTop: 4,
                       }}
                     >
-                      {currentRoom?.tree_id != 0 ? (
+                      {currentRoom?.tree_id != 0 && (
                         <Box>
                           <Box>
                             {currentRoom?.status == "ready" && (
-                              <Typography color={"secondary"}>
-                                Waiting room to open...
-                              </Typography>
+                              <Box>
+                                <Typography color={"secondary"} pb={2}>
+                                  Waiting room to open...
+                                </Typography>
+
+                                <Button
+                                  variant="outlined"
+                                  onClick={toggleOpenRoom}
+                                >
+                                  Open room
+                                </Button>
+                              </Box>
                             )}
                           </Box>
-                        </Box>
-                      ) : (
-                        <Button
-                          color="primary"
-                          variant="outlined"
-                          onClick={toggleAddWhiteList}
-                        >
-                          Add white list
-                        </Button>
-                      )}
-                    </Box>
-
-                    <Box textAlign={"center"} pt={2}>
-                      {currentRoom?.status == "open" && (
-                        <Box>
-                          <Typography>Bid after: </Typography>
-                          <Countdown date={currentRoom.start_time * 1000}>
-                            <Button
-                              variant="outlined"
-                              onClick={toggleJoinRoom}
-                              startIcon={
-                                isLoading && (
-                                  <CircularProgress size={20} color="inherit" />
-                                )
-                              }
-                            >
-                              Join room
-                            </Button>
-                          </Countdown>
                         </Box>
                       )}
                     </Box>
                   </Box>
-
-                  {currentRoom?.status == "open" && (
-                    <Box textAlign={"center"}>
-                      <Typography>Room close after: </Typography>
-                      <Countdown
-                        date={
-                          currentRoom.start_time * 1000 +
-                          currentRoom.duration_time * 1000
-                        }
-                      >
-                        <Box pt={3} className="vault-content">
-                          <Button
-                            sx={{
-                              minWidth: 170,
-                            }}
-                            variant="outlined"
-                            onClick={toggleCloseRoom}
-                          >
-                            Close room
-                          </Button>
-                        </Box>
-                      </Countdown>
-                    </Box>
+                  {query?.id && (
+                    <ModalBidding
+                      open={openBidding}
+                      toggle={toggleBidding}
+                      roomId={query?.id}
+                    />
                   )}
                 </>
               )}
-              {/* <div className="text-center">ENS Supporter ZK Badge</div> */}
             </>
           )}
-        </div>
+
+          {currentRoom?.status == "open" && isOwner && (
+            <Box textAlign={"center"}>
+              <Typography>Room close after: </Typography>
+              <Countdown
+                date={
+                  currentRoom.start_time * 1000 +
+                  currentRoom.duration_time * 1000
+                }
+              >
+                <>
+                  {/* <Box>
+                    {currentRoom.status != "close" && (
+                      <Box pt={3} className="vault-content">
+                        <Button
+                          sx={{
+                            minWidth: 170,
+                          }}
+                          variant="outlined"
+                          onClick={toggleCloseRoom}
+                        >
+                          Close room
+                        </Button>
+                      </Box>
+                    )}
+                  </Box> */}
+                </>
+              </Countdown>
+            </Box>
+          )}
+
+          <Button variant="outlined">Join room</Button>
+        </Box>
+
+        <Box
+          sx={{
+            width: "100%",
+          }}
+        >
+          {currentRoom?.tree_id == 0 && (
+            <Box mb={2} textAlign="right">
+              <Button
+                color="primary"
+                variant="outlined"
+                onClick={toggleOpenAddWhiteList}
+              >
+                Add white list
+              </Button>
+            </Box>
+          )}
+
+          <Box
+            p={3}
+            borderRadius={4}
+            sx={{
+              fontSize: 14,
+              background: "rgb(19, 32, 61)",
+            }}
+          >
+            <Box>
+              <Typography>Bid Type: {currentRoom?.bid_type}</Typography>
+              <Typography>Creator: {currentRoom?.creator}</Typography>
+              <Typography>Visibility: {currentRoom?.visibility}</Typography>
+            </Box>
+            {currentRoom?.info && (
+              <Box>
+                <Typography>Website: {currentRoom.info.website}</Typography>
+                <Typography>Phone: {currentRoom.info.phone}</Typography>
+              </Box>
+            )}
+          </Box>
+
+          <WhiteListInRoom />
+
+          {currentRoom?.duration_time && currentRoom.status == "ready" && (
+            <Box className="box-app" mt={2}>
+              <Box display={"flex"} alignItems="center" gap={2}>
+                <Typography>
+                  Duration Time: {currentRoom?.duration_time * 1000}s
+                </Typography>
+
+                <Button
+                  variant="outlined"
+                  onClick={toggleOpenUpdateDurationTime}
+                >
+                  Update Duration
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Box>
       </Box>
+
       <Box my={2}>
-        <ListUserBidding />
+        <ListUserBidding currentResult={currentRoom?.result || []} />
       </Box>
     </div>
   );

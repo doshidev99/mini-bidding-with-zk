@@ -15,6 +15,15 @@ export const zkApi = {
     return res;
   },
 
+  async viewRoom(payload: {
+    room_id: any;
+    inputs: any;
+    proof: any;
+  }): Promise<any> {
+    const res = await axiosInstance.post("/room/view", payload);
+    return res;
+  },
+
   async getRoom(): Promise<any> {
     const res = await axiosInstance.get("/rooms/list", {
       params: {
@@ -34,9 +43,17 @@ export const zkApi = {
   },
 
   async getRoomById(id): Promise<any> {
-    console.log("id", id);
-
     const res = await axiosInstance.get(`/room`, {
+      params: {
+        id,
+      },
+    });
+    return res;
+  },
+
+  async getViewRoomById(id): Promise<any> {
+    console.log("id", id);
+    const res = await axiosInstance.get(`/room/viewer`, {
       params: {
         id,
       },

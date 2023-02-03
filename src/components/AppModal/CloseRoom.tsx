@@ -2,6 +2,7 @@ import { zkApi } from "@api/zkApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import { useDetailInRoom } from "@services/roomService";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,6 +14,7 @@ const schema = yup.object().shape({});
 const CloseRoom = ({ open, toggle }) => {
   const { query } = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { refetch } = useDetailInRoom();
 
   const { handleSubmit } = useForm({
     resolver: yupResolver(schema),
@@ -30,6 +32,7 @@ const CloseRoom = ({ open, toggle }) => {
 
       toast.success("Room closed successfully");
       await zkApi.getResultByRoom({ room_id: +query.id });
+      refetch();
       toggle();
     } catch (e) {
       toast.error(e.message);

@@ -1,29 +1,18 @@
-import ModalCreateRoom from "@components/AppModal/ModalCreateRoom";
+import ModalUserJoinRoom from "@components/AppModal/ModalUserJoinRoom";
 import { useToggle } from "@hooks/useToggle";
 import { Box, Button, Chip, Skeleton, Typography } from "@mui/material";
 import { useRoomService } from "@services/roomService";
-import { generateKeyPair } from "@utils/configOpenpgp";
+import { useStoreDataRoom } from "@store/useStoreDataRoom";
+import { useStoreModal } from "@store/useStoreModal";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import Countdown from "react-countdown";
-import * as yup from "yup";
-
-const schema = yup.object().shape({
-  code: yup.string().required(),
-  email: yup.string().required(),
-});
 
 const Rooms = () => {
-  const { data: roomList, isLoading } = useRoomService();
-  const [open, toggle] = useToggle();
-  const [currentRoomId, setCurrentRoomId] = useState();
-  const [openAddWhiteList, toggleAddWhiteList] = useToggle();
-  const [openCreate, toggleCreate] = useToggle();
+  const { isLoading } = useRoomService();
+  const { roomList } = useStoreDataRoom();
+  const [openJoinRoom, toggleJoinRoom] = useToggle();
 
-  useEffect(() => {
-    generateKeyPair();
-  }, []);
+  const { toggleOpenCreate } = useStoreModal();
 
   if (isLoading)
     return (
@@ -36,13 +25,22 @@ const Rooms = () => {
   return (
     <div className="container">
       <Box textAlign={"right"}>
-        <Button variant="outlined" color="secondary" onClick={toggleCreate}>
-          Create room
-        </Button>
+        <Box display={"flex"} justifyContent="flex-end" gap={10}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={toggleOpenCreate}
+          >
+            Create room
+          </Button>
+          {/* 
+          <Button variant="outlined" color="primary" onClick={toggleJoinRoom}>
+            Join room
+          </Button> */}
+        </Box>
       </Box>
       <div className="grid">
         {roomList?.map((room) => {
-          const timeCountDown = room.start_time * 1000 + room.duration_time;
           return (
             <Link href={`/rooms/${room.id}`} key={room.id}>
               <div className="box-card">
@@ -77,10 +75,12 @@ const Rooms = () => {
                 </div>
                 <div className="text-center">{room.name || "Name"}</div>
 
-                <Box textAlign={"center"}>
-                  <Countdown date={timeCountDown}>
-                    <span></span>
-                  </Countdown>
+                <Box
+                  sx={{
+                    textAlign: "center",
+                  }}
+                >
+                  <Box>Visibility: {room?.visibility}</Box>
                 </Box>
               </div>
             </Link>
@@ -94,7 +94,7 @@ const Rooms = () => {
         </Typography>
       )}
 
-      <ModalCreateRoom open={openCreate} toggle={toggleCreate} />
+      <ModalUserJoinRoom open={openJoinRoom} toggle={toggleJoinRoom} />
     </div>
   );
 };

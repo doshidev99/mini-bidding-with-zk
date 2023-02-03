@@ -14,6 +14,7 @@ import "../styles/global.css";
 import darkTheme from "../theme/darkTheme";
 import { chains, client } from "../wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import GlobalModal from "@views/GlobalModal";
 
 function App({ Component, pageProps }) {
   const Guard = (() => {
@@ -64,6 +65,7 @@ function App({ Component, pageProps }) {
     <Guard>
       <Container>
         <Component {...pageProps} />
+        <GlobalModal />
       </Container>
     </Guard>
   );
