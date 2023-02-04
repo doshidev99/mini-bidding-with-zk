@@ -15,7 +15,7 @@ export const zkApi = {
     return res;
   },
 
-  async viewRoom(payload: {
+  async viewRoomWithProof(payload: {
     room_id: any;
     inputs: any;
     proof: any;
@@ -52,7 +52,6 @@ export const zkApi = {
   },
 
   async getViewRoomById(id): Promise<any> {
-    console.log("id", id);
     const res = await axiosInstance.get(`/room/viewer`, {
       params: {
         id,
@@ -91,7 +90,7 @@ export const zkApi = {
   },
 
   async joinRoom(payload: {
-    room_id: string;
+    room_id: number;
     email: string;
     private_code: string;
   }): Promise<any> {

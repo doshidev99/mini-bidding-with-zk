@@ -10,9 +10,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useDetailInRoom } from "@services/roomService";
+import { useStoreDataInRoom } from "@store/useStoreDataInRoom";
 import { useStoreDataRoom } from "@store/useStoreDataRoom";
 import { useStoreProfile } from "@store/useStoreProfile";
 import { LocalStorage } from "@utils/newLocalstorage";
+import { keyBy, keys } from "lodash-es";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -23,12 +26,14 @@ const schema = yup.object().shape({
   email: yup.string().required(),
 });
 
-const ModalJoinRoom = ({ open, toggle, roomId }) => {
+const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
+  const { query } = useRouter();
   const [joining, onJoining] = useState(false);
   const [openBid, toggleBid] = useToggle(false);
   const { updateProofId } = useStoreDataRoom();
   const { profile } = useStoreProfile();
-
+  const { updateIsLoadingInRoom, updateDetailInRoom, updateIsOwner } =
+    useStoreDataInRoom();
   const {
     handleSubmit,
     control,
@@ -45,27 +50,35 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
     mode: "onChange",
   });
 
+  const room_id = roomId || (query?.id as string);
   const onSubmit = async (formValues) => {
     onJoining(true);
     const payload = {
-      room_id: roomId,
+      room_id: +room_id,
       email: formValues.email,
       private_code: formValues.code,
     };
     try {
       const proofId = await zkApi.joinRoom(payload);
+      console.log({ proofId });
+
       updateProofId(proofId);
       const dataSaveToStorage = {
-        [profile.auth_user + roomId]: {
+        [profile.auth_user + room_id]: {
           proofId,
           payload,
         },
       };
 
-      console.log("dataSaveToStorage", dataSaveToStorage);
-      LocalStorage.set("dataSaveToStorage", dataSaveToStorage);
+      const viewRoom = await zkApi.viewRoomWithProof({
+        room_id: +room_id,
+        inputs: proofId.inputs,
+        proof: proofId.proof,
+      });
+
+      updateDetailInRoom(viewRoom);
+      LocalStorage.set("proofInRoom", dataSaveToStorage);
       toast.success("Join room successfully");
-      toggleBid();
       toggle();
     } catch (e) {
       toast.error(e.message);
@@ -149,8 +162,6 @@ const ModalJoinRoom = ({ open, toggle, roomId }) => {
           </Box>
         </Box>
       </Modal>
-
-      <ModalBidding open={openBid} toggle={toggleBid} roomId={roomId} />
     </div>
   );
 };
@@ -169,10 +180,12 @@ const style = {
   p: 4,
 };
 
-export const ModalBidding = ({ open, toggle, roomId }) => {
+export const ModalBidding = ({ open, toggle }) => {
+  const { query } = useRouter();
+
   const [isBidding, setIsBidding] = useState(false);
   const { refetch } = useDetailInRoom();
-
+  const { currentRoom, updateDetailInRoom } = useStoreDataInRoom();
   const { profile } = useStoreProfile();
 
   const {
@@ -192,16 +205,17 @@ export const ModalBidding = ({ open, toggle, roomId }) => {
   });
 
   const onBidding = async (formValues) => {
+    if (!query.id) return;
     setIsBidding(true);
     try {
-      const prevPayload = LocalStorage.get("dataSaveToStorage");
-      const _dataJoinRoomByProfile = prevPayload[profile.auth_user + roomId];
+      const prevPayload = LocalStorage.get("proofInRoom");
+      const _dataJoinRoomByProfile = prevPayload[profile.auth_user + query.id];
       const bid_data = await zkApi.joinBidding({
         ..._dataJoinRoomByProfile.payload,
         bid_value: +formValues.bidValue,
       });
       const payload = {
-        room_id: +roomId,
+        room_id: +query.id,
         proof_id: _dataJoinRoomByProfile.proofId.proof,
         bid_data: {
           inputs: bid_data.inputs,
@@ -210,6 +224,15 @@ export const ModalBidding = ({ open, toggle, roomId }) => {
         encrypted_data: bid_data.fake_encrypted_data,
       };
       await zkApi.bidding(payload);
+      const myBid = await zkApi.getBiddingUserInRoom(+query.id);
+
+      const keyByMyBid = keyBy(myBid, "room_id");
+      const isBided = keys(keyByMyBid).includes(+query.id + "");
+      currentRoom.isBided = isBided;
+      console.log("currentRoom", currentRoom);
+
+      updateDetailInRoom({ ...currentRoom });
+
       refetch();
       toast.success("Bidding successfully");
       toggle();
@@ -224,10 +247,7 @@ export const ModalBidding = ({ open, toggle, roomId }) => {
     <Modal open={open} onClose={toggle}>
       <Box>
         <Box sx={style}>
-          <Typography variant="subtitle1">
-            Bidding room:
-            {roomId && roomId}
-          </Typography>
+          <Typography variant="subtitle1">Bidding room:</Typography>
 
           <BamInput
             control={control}

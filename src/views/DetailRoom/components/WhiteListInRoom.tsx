@@ -5,7 +5,7 @@ import { useStoreDataInRoom } from "@store/useStoreDataInRoom";
 const WhiteListInRoom = () => {
   const { currentRoom, isOwner } = useStoreDataInRoom();
 
-  if (!currentRoom?.whitelist?.length && !isOwner) return null;
+  if (!currentRoom?.whitelist?.length || !isOwner) return null;
   return (
     <Box className="box-app" mt={2}>
       {currentRoom?.tree_id != 0 && (

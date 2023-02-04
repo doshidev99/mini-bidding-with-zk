@@ -15,6 +15,12 @@ export interface IStorageData {
 
   isCloseRoom: boolean;
   toggleCloseRoom: () => void;
+
+  isOpenJoinRoom: boolean;
+  toggleOpenJoinRoom: () => void;
+
+  isOpenBidding: boolean;
+  toggleOpenBidding: () => void;
 }
 
 const initialValues = {
@@ -23,6 +29,8 @@ const initialValues = {
   isOpenUpdateDurationTime: false,
   isOpenRoom: false,
   isCloseRoom: false,
+  isOpenJoinRoom: false,
+  isOpenBidding: false,
 };
 
 export const useStoreModal = create<IStorageData & {}>()((set) => ({
@@ -55,5 +63,17 @@ export const useStoreModal = create<IStorageData & {}>()((set) => ({
     set((state) => ({
       ...state,
       isCloseRoom: !state.isCloseRoom,
+    })),
+
+  toggleOpenJoinRoom: () =>
+    set((state) => ({
+      ...state,
+      isOpenJoinRoom: !state.isOpenJoinRoom,
+    })),
+
+  toggleOpenBidding: () =>
+    set((state) => ({
+      ...state,
+      isOpenBidding: !state.isOpenBidding,
     })),
 }));

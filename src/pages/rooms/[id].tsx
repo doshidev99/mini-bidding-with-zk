@@ -1,6 +1,3 @@
-import ModalJoinRoom, {
-  ModalBidding,
-} from "@components/AppModal/ModalJoinRoom";
 import ListUserBidding from "@components/ListUserBidding";
 import { useToggle } from "@hooks/useToggle";
 import { Box, Button, Skeleton, Typography } from "@mui/material";
@@ -8,48 +5,28 @@ import { useDetailInRoom } from "@services/roomService";
 import { useStoreDataInRoom } from "@store/useStoreDataInRoom";
 import { useStoreModal } from "@store/useStoreModal";
 import { useStoreProfile } from "@store/useStoreProfile";
-import { LocalStorage } from "@utils/newLocalstorage";
 import WhiteListInRoom from "@views/DetailRoom/components/WhiteListInRoom";
-import { keys } from "lodash-es";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
 import Countdown from "react-countdown";
 
 const RoomDetail = () => {
-  const { query } = useRouter();
   const [isOpen, onOpen] = useToggle();
-  const [openJoinRoom, toggleJoinRoom] = useToggle();
-  const [openBidding, toggleBidding] = useToggle();
 
-  useDetailInRoom();
+  const { isLoading } = useDetailInRoom();
 
   const {
     toggleOpenAddWhiteList,
     toggleOpenUpdateDurationTime,
     toggleOpenRoom,
     toggleCloseRoom,
+    toggleOpenJoinRoom,
+    toggleOpenBidding,
   } = useStoreModal();
-  const { profile } = useStoreProfile();
   const { isLoadingDetailInRoom, currentRoom, isOwner } = useStoreDataInRoom();
 
-  const isJoinRoom = useMemo(() => {
-    const _prevDataJoinRoom = LocalStorage.get("dataSaveToStorage");
-    return (
-      _prevDataJoinRoom &&
-      profile &&
-      keys(_prevDataJoinRoom).includes(profile.auth_user + query.id)
-    );
-  }, [profile, query.id]);
-
+  console.log("currentRoom", currentRoom);
   return (
     <div className="container">
-      <ModalJoinRoom
-        open={openJoinRoom}
-        toggle={toggleJoinRoom}
-        roomId={+query.id}
-      />
-
       <Box display={"flex"} alignItems="flex-start" gap={2}>
         <Box
           className="box-contributor"
@@ -57,7 +34,7 @@ const RoomDetail = () => {
             minWidth: 300,
           }}
         >
-          {isLoadingDetailInRoom ? (
+          {isLoadingDetailInRoom || isLoading ? (
             <Skeleton height={"100%"} />
           ) : (
             <>
@@ -121,48 +98,39 @@ const RoomDetail = () => {
                 />
               </div>
 
-              {false ? (
-                <Typography textAlign={"center"}>User Bided</Typography>
-              ) : (
-                <>
-                  <Box pb={2} textAlign="center">
-                    <Box
-                      sx={{
-                        margin: "0 auto",
-                        paddingTop: 4,
-                      }}
-                    >
-                      {currentRoom?.tree_id != 0 && (
+              <>
+                <Box pb={2} textAlign="center">
+                  <Box
+                    sx={{
+                      margin: "0 auto",
+                      paddingTop: 4,
+                    }}
+                  >
+                    {currentRoom?.tree_id != 0 && (
+                      <Box>
                         <Box>
-                          <Box>
-                            {currentRoom?.status == "ready" && (
-                              <Box>
-                                <Typography color={"secondary"} pb={2}>
-                                  Waiting room to open...
-                                </Typography>
+                          {currentRoom?.status == "ready" && (
+                            <Box>
+                              <Typography color={"secondary"} pb={2}>
+                                Waiting room to open...
+                              </Typography>
 
+                              {isOwner && (
                                 <Button
                                   variant="outlined"
                                   onClick={toggleOpenRoom}
                                 >
                                   Open room
                                 </Button>
-                              </Box>
-                            )}
-                          </Box>
+                              )}
+                            </Box>
+                          )}
                         </Box>
-                      )}
-                    </Box>
+                      </Box>
+                    )}
                   </Box>
-                  {query?.id && (
-                    <ModalBidding
-                      open={openBidding}
-                      toggle={toggleBidding}
-                      roomId={query?.id}
-                    />
-                  )}
-                </>
-              )}
+                </Box>
+              </>
             </>
           )}
 
@@ -176,7 +144,7 @@ const RoomDetail = () => {
                 }
               >
                 <>
-                  {/* <Box>
+                  <Box>
                     {currentRoom.status != "close" && (
                       <Box pt={3} className="vault-content">
                         <Button
@@ -190,13 +158,51 @@ const RoomDetail = () => {
                         </Button>
                       </Box>
                     )}
-                  </Box> */}
+                  </Box>
                 </>
               </Countdown>
             </Box>
           )}
 
-          <Button variant="outlined">Join room</Button>
+          {!isOwner &&
+          currentRoom?.status == "open" &&
+          currentRoom?.start_time == 0 ? (
+            <Button variant="outlined" onClick={toggleOpenJoinRoom}>
+              Join room
+            </Button>
+          ) : (
+            <Box textAlign={"center"}>
+              {!isOwner && currentRoom && (
+                <Box>
+                  <Box mb={2}>
+                    <Countdown
+                      date={
+                        currentRoom.start_time * 1000 +
+                        currentRoom.duration_time * 1000
+                      }
+                    >
+                      <Typography>
+                        {currentRoom?.status != "ready" && "Room expired"}{" "}
+                      </Typography>
+                    </Countdown>
+                  </Box>
+                  {currentRoom.hasOwnProperty("isBided") && (
+                    <>
+                      {!currentRoom?.isBided ? (
+                        <Button variant="outlined" onClick={toggleOpenBidding}>
+                          Bid
+                        </Button>
+                      ) : (
+                        <Typography color={"secondary"}>
+                          You have bided
+                        </Typography>
+                      )}
+                    </>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
         </Box>
 
         <Box
@@ -239,19 +245,21 @@ const RoomDetail = () => {
 
           <WhiteListInRoom />
 
-          {currentRoom?.duration_time && currentRoom.status == "ready" && (
+          {currentRoom?.duration_time && (
             <Box className="box-app" mt={2}>
               <Box display={"flex"} alignItems="center" gap={2}>
                 <Typography>
-                  Duration Time: {currentRoom?.duration_time * 1000}s
+                  Duration Time: {currentRoom?.duration_time}
                 </Typography>
 
-                <Button
-                  variant="outlined"
-                  onClick={toggleOpenUpdateDurationTime}
-                >
-                  Update Duration
-                </Button>
+                {currentRoom.status == "ready" && isOwner && (
+                  <Button
+                    variant="outlined"
+                    onClick={toggleOpenUpdateDurationTime}
+                  >
+                    Update Duration
+                  </Button>
+                )}
               </Box>
             </Box>
           )}
