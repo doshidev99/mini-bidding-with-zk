@@ -29,11 +29,9 @@ const schema = yup.object().shape({
 const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
   const { query } = useRouter();
   const [joining, onJoining] = useState(false);
-  const [openBid, toggleBid] = useToggle(false);
   const { updateProofId } = useStoreDataRoom();
   const { profile } = useStoreProfile();
-  const { updateIsLoadingInRoom, updateDetailInRoom, updateIsOwner } =
-    useStoreDataInRoom();
+  const { updateDetailInRoom } = useStoreDataInRoom();
   const {
     handleSubmit,
     control,
@@ -60,7 +58,6 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
     };
     try {
       const proofId = await zkApi.joinRoom(payload);
-      console.log({ proofId });
 
       updateProofId(proofId);
       const dataSaveToStorage = {
@@ -77,6 +74,16 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
       });
 
       updateDetailInRoom(viewRoom);
+      if (viewRoom.status == "open") {
+        const myBid = await zkApi.getBiddingUserInRoom(roomId);
+        if (myBid) {
+          const keyByMyBid = keyBy(myBid, "room_id");
+          const isBided = keys(keyByMyBid).includes(roomId + "");
+          viewRoom.isBided = isBided;
+          updateDetailInRoom({ ...viewRoom });
+        }
+      }
+
       LocalStorage.set("proofInRoom", dataSaveToStorage);
       toast.success("Join room successfully");
       toggle();

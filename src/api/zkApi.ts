@@ -104,7 +104,7 @@ export const zkApi = {
     name: string;
     room: number;
   }): Promise<any> {
-    const res = await axiosInstance.post("/room/merkle", payload);
+    const res = await axiosInstance.post("/room/whitelist", payload);
     return res;
   },
 

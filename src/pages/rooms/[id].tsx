@@ -4,7 +4,6 @@ import { Box, Button, Skeleton, Typography } from "@mui/material";
 import { useDetailInRoom } from "@services/roomService";
 import { useStoreDataInRoom } from "@store/useStoreDataInRoom";
 import { useStoreModal } from "@store/useStoreModal";
-import { useStoreProfile } from "@store/useStoreProfile";
 import WhiteListInRoom from "@views/DetailRoom/components/WhiteListInRoom";
 import Image from "next/image";
 import Countdown from "react-countdown";
@@ -24,7 +23,6 @@ const RoomDetail = () => {
   } = useStoreModal();
   const { isLoadingDetailInRoom, currentRoom, isOwner } = useStoreDataInRoom();
 
-  console.log("currentRoom", currentRoom);
   return (
     <div className="container">
       <Box display={"flex"} alignItems="flex-start" gap={2}>
@@ -38,42 +36,6 @@ const RoomDetail = () => {
             <Skeleton height={"100%"} />
           ) : (
             <>
-              <div className="box-vault-flex">
-                {currentRoom?.tree_id != 0 && (
-                  <div className={`box-vault ${isOpen && "open"}`}>
-                    <Box>
-                      <div
-                        className={`vault-transform`}
-                        onClick={onOpen}
-                        style={{
-                          top: 0,
-                        }}
-                      >
-                        <Image
-                          className={`vault-transform__img ${isOpen && "open"}`}
-                          src={"/assets/img/arrow.svg"}
-                          alt="Sismo"
-                          width={14}
-                          height={14}
-                        />
-                      </div>
-                    </Box>
-                  </div>
-                )}
-
-                {!isOpen && (
-                  <div className={`vault-transform`} onClick={onOpen}>
-                    <Image
-                      className={`vault-transform__img ${isOpen && "open"}`}
-                      src={"/assets/img/arrow.svg"}
-                      alt="Sismo"
-                      width={14}
-                      height={14}
-                    />
-                  </div>
-                )}
-              </div>
-
               <div>
                 <div className="text-left">
                   <span
@@ -131,6 +93,49 @@ const RoomDetail = () => {
                   </Box>
                 </Box>
               </>
+
+              {!isOwner &&
+              currentRoom?.status == "open" &&
+              currentRoom?.start_time == 0 ? (
+                <Button variant="outlined" onClick={toggleOpenJoinRoom}>
+                  Join room
+                </Button>
+              ) : (
+                <Box textAlign={"center"}>
+                  {!isOwner && currentRoom && (
+                    <Box>
+                      <Box mb={2}>
+                        <Countdown
+                          date={
+                            currentRoom.start_time * 1000 +
+                            currentRoom.duration_time * 1000
+                          }
+                        >
+                          <Typography>
+                            {currentRoom?.status != "ready" && "Room expired"}{" "}
+                          </Typography>
+                        </Countdown>
+                      </Box>
+                      {currentRoom.hasOwnProperty("isBided") && (
+                        <>
+                          {!currentRoom?.isBided ? (
+                            <Button
+                              variant="outlined"
+                              onClick={toggleOpenBidding}
+                            >
+                              Bid
+                            </Button>
+                          ) : (
+                            <Typography color={"secondary"}>
+                              You have bided
+                            </Typography>
+                          )}
+                        </>
+                      )}
+                    </Box>
+                  )}
+                </Box>
+              )}
             </>
           )}
 
@@ -163,46 +168,6 @@ const RoomDetail = () => {
               </Countdown>
             </Box>
           )}
-
-          {!isOwner &&
-          currentRoom?.status == "open" &&
-          currentRoom?.start_time == 0 ? (
-            <Button variant="outlined" onClick={toggleOpenJoinRoom}>
-              Join room
-            </Button>
-          ) : (
-            <Box textAlign={"center"}>
-              {!isOwner && currentRoom && (
-                <Box>
-                  <Box mb={2}>
-                    <Countdown
-                      date={
-                        currentRoom.start_time * 1000 +
-                        currentRoom.duration_time * 1000
-                      }
-                    >
-                      <Typography>
-                        {currentRoom?.status != "ready" && "Room expired"}{" "}
-                      </Typography>
-                    </Countdown>
-                  </Box>
-                  {currentRoom.hasOwnProperty("isBided") && (
-                    <>
-                      {!currentRoom?.isBided ? (
-                        <Button variant="outlined" onClick={toggleOpenBidding}>
-                          Bid
-                        </Button>
-                      ) : (
-                        <Typography color={"secondary"}>
-                          You have bided
-                        </Typography>
-                      )}
-                    </>
-                  )}
-                </Box>
-              )}
-            </Box>
-          )}
         </Box>
 
         <Box
@@ -210,58 +175,62 @@ const RoomDetail = () => {
             width: "100%",
           }}
         >
-          {currentRoom?.tree_id == 0 && (
-            <Box mb={2} textAlign="right">
-              <Button
-                color="primary"
-                variant="outlined"
-                onClick={toggleOpenAddWhiteList}
-              >
-                Add white list
-              </Button>
-            </Box>
-          )}
-
-          <Box
-            p={3}
-            borderRadius={4}
-            sx={{
-              fontSize: 14,
-              background: "rgb(19, 32, 61)",
-            }}
-          >
-            <Box>
-              <Typography>Bid Type: {currentRoom?.bid_type}</Typography>
-              <Typography>Creator: {currentRoom?.creator}</Typography>
-              <Typography>Visibility: {currentRoom?.visibility}</Typography>
-            </Box>
-            {currentRoom?.info && (
-              <Box>
-                <Typography>Website: {currentRoom.info.website}</Typography>
-                <Typography>Phone: {currentRoom.info.phone}</Typography>
-              </Box>
-            )}
-          </Box>
-
-          <WhiteListInRoom />
-
-          {currentRoom?.duration_time && (
-            <Box className="box-app" mt={2}>
-              <Box display={"flex"} alignItems="center" gap={2}>
-                <Typography>
-                  Duration Time: {currentRoom?.duration_time}
-                </Typography>
-
-                {currentRoom.status == "ready" && isOwner && (
+          {currentRoom && (
+            <>
+              {currentRoom?.tree_id == 0 && (
+                <Box mb={2} textAlign="right">
                   <Button
+                    color="primary"
                     variant="outlined"
-                    onClick={toggleOpenUpdateDurationTime}
+                    onClick={toggleOpenAddWhiteList}
                   >
-                    Update Duration
+                    Add white list
                   </Button>
+                </Box>
+              )}
+
+              <Box
+                p={3}
+                borderRadius={4}
+                sx={{
+                  fontSize: 14,
+                  background: "rgb(19, 32, 61)",
+                }}
+              >
+                <Box>
+                  <Typography>Bid Type: {currentRoom?.bid_type}</Typography>
+                  <Typography>Creator: {currentRoom?.creator}</Typography>
+                  <Typography>Visibility: {currentRoom?.visibility}</Typography>
+                </Box>
+                {currentRoom?.info && (
+                  <Box>
+                    <Typography>Website: {currentRoom.info.website}</Typography>
+                    <Typography>Phone: {currentRoom.info.phone}</Typography>
+                  </Box>
                 )}
               </Box>
-            </Box>
+
+              <WhiteListInRoom />
+
+              {currentRoom?.duration_time && (
+                <Box className="box-app" mt={2}>
+                  <Box display={"flex"} alignItems="center" gap={2}>
+                    <Typography>
+                      Duration Time: {currentRoom?.duration_time}
+                    </Typography>
+
+                    {currentRoom.status == "ready" && isOwner && (
+                      <Button
+                        variant="outlined"
+                        onClick={toggleOpenUpdateDurationTime}
+                      >
+                        Update Duration
+                      </Button>
+                    )}
+                  </Box>
+                </Box>
+              )}
+            </>
           )}
         </Box>
       </Box>
