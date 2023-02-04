@@ -1,0 +1,155 @@
+import BamInput from "@components/Form/BamInput";
+import UnstyledInputBasic from "@components/Form/CustomInput";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Button, CircularProgress, Modal, Typography } from "@mui/material";
+import { Box } from "@mui/system";
+import { useRoomService } from "@services/roomService";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+
+const schema = yup.object().shape({
+  name: yup.string().required(),
+  duration_time: yup.number().required(),
+  info: yup.object().shape({
+    description: yup.string().required(),
+    website: yup.string().required(),
+    phone: yup.string().required(),
+  }),
+});
+
+const ModalCreateRoom = ({ open, toggle }) => {
+  const { create } = useRoomService();
+
+  const [submitting, onSubmitting] = useState(false);
+
+  const {
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<{
+    name: string;
+    duration_time: number;
+    info: {
+      description: string;
+      website: string;
+      phone: string;
+    };
+  }>({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: "",
+      info: {
+        description: "",
+        website: "",
+        phone: "",
+      },
+    },
+    mode: "onChange",
+  });
+
+  const onSubmit = async (formValues) => {
+    try {
+      onSubmitting(true);
+      const payload = {
+        ...formValues,
+        visibility: "private",
+        bid_type: "only_once",
+        duration_time: formValues.duration_time,
+      };
+      const _data = await create.mutateAsync(payload);
+      toggle();
+    } catch (e) {
+    } finally {
+      onSubmitting(false);
+    }
+  };
+
+  return (
+    <div>
+      <Modal open={open} onClose={toggle}>
+        <Box>
+          <Box sx={style}>
+            <Typography variant="subtitle1">
+              Please fill info room below
+            </Typography>
+            <BamInput
+              control={control}
+              label="Room name"
+              name="name"
+              placeholder="Enter your room name"
+              rules={{ required: true }}
+              error={errors.name}
+              autoFocus={true}
+            />
+
+            <BamInput
+              control={control}
+              label="Website"
+              name="info.website"
+              placeholder="Enter your room's website"
+              rules={{ required: true }}
+              error={errors.info?.website}
+              autoFocus={true}
+            />
+
+            <BamInput
+              control={control}
+              label="Phone number"
+              name="info.phone"
+              placeholder="Enter your room's phone number"
+              rules={{ required: true }}
+              error={errors.info?.phone}
+              autoFocus={true}
+            />
+
+            <BamInput
+              control={control}
+              label="Duration time"
+              name="duration_time"
+              placeholder="Enter your room's phone number"
+              rules={{ required: true }}
+              error={errors.duration_time}
+              autoFocus={true}
+            />
+
+            <UnstyledInputBasic
+              label="Description"
+              onChange={(e) => setValue("info.description", e.target.value)}
+            />
+
+            <Box textAlign={"center"} mt={3}>
+              <Button
+                startIcon={
+                  submitting && <CircularProgress size={20} color="secondary" />
+                }
+                variant="outlined"
+                type="submit"
+                onClick={handleSubmit(onSubmit)}
+              >
+                Create room
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
+    </div>
+  );
+};
+
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  color: "#fff",
+  bgcolor: "background.paper",
+  // border: "2px solid #000",
+  borderRadius: 4,
+  boxShadow: 24,
+  p: 4,
+};
+
+export default ModalCreateRoom;

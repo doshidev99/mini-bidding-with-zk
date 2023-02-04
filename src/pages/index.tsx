@@ -1,62 +1,45 @@
-import { Box, Button, CircularProgress } from "@mui/material";
+import ModalCreateRoom from "@components/AppModal/ModalCreateRoom";
+import { useToggle } from "@hooks/useToggle";
+import { Box, Button, Chip, Skeleton, Typography } from "@mui/material";
+import { useRoomService } from "@services/roomService";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "react-hot-toast";
-import { useAccount } from "wagmi";
-import { FormCreateSession } from "../components/Form/FormCreateSession";
-import {
-  useCheckHasBidding,
-  useGetCurrentSession,
-  useZkFunction,
-} from "../hooks/useZkFunction";
-import { useStoreData } from "../store/useStoreData";
+import Countdown from "react-countdown";
+import * as yup from "yup";
 
-const App = () => {
-  const { hasBidding, checkHasBidding } = useCheckHasBidding();
-  const { onInitBidding, onJoinRoom } = useZkFunction();
-  const [loading, setLoading] = useState(false);
-  // const { loading: isLoading } = useGetCurrentSession();
-  const { sessionList } = useStoreData();
+const schema = yup.object().shape({
+  code: yup.string().required(),
+  email: yup.string().required(),
+});
 
-  const initBidding = () => {
-    setLoading(true);
-    onInitBidding()
-      .then(() => {
-        toast("Session initialized");
-        checkHasBidding();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+const Rooms = () => {
+  const { data: roomList, isLoading } = useRoomService();
+  const [open, toggle] = useToggle();
+  const [currentRoomId, setCurrentRoomId] = useState();
+  const [openAddWhiteList, toggleAddWhiteList] = useToggle();
+  const [openCreate, toggleCreate] = useToggle();
 
-  if (!hasBidding)
+  if (isLoading)
     return (
-      <Box textAlign={"center"}>
-        <Button
-          variant="contained"
-          sx={{
-            background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
-          }}
-          startIcon={loading && <CircularProgress size={20} />}
-          onClick={initBidding}
-        >
-          Start Bidding
-        </Button>
-      </Box>
+      <div className="grid">
+        <Skeleton height={600} />
+        <Skeleton height={600} />
+      </div>
     );
-  if (sessionList.roomID == 0) return <FormCreateSession />;
 
   return (
     <div className="container">
+      <Box textAlign={"right"}>
+        <Button variant="outlined" color="secondary" onClick={toggleCreate}>
+          Create room
+        </Button>
+      </Box>
       <div className="grid">
-        {[1].map((idx) => {
+        {roomList?.map((room) => {
+          const timeCountDown = room.start_time * 1000 + room.duration_time;
           return (
-            <Box
-              // href="/contributor"
-              key={idx}
-            >
+            <Link href={`/rooms/${room.id}`} key={room.id}>
               <div className="box-card">
                 <div>
                   <div className="text-left">
@@ -67,8 +50,17 @@ const App = () => {
                     >
                       Room Id:
                     </span>{" "}
-                    {sessionList?.roomID}
+                    {room.id}
+                    <br />
                   </div>
+                  <Box>
+                    <Chip
+                      label={room.status}
+                      color={`${
+                        room.status == "ready" ? "success" : "primary"
+                      }`}
+                    />
+                  </Box>
                 </div>
                 <div className="box-card__img">
                   <Image
@@ -78,29 +70,32 @@ const App = () => {
                     height={200}
                   />
                 </div>
-                <div className="text-center">{sessionList?.username}</div>
+                <div className="text-center">{room.name || "Name"}</div>
 
-                <Box
-                  sx={{
-                    margin: "0 auto",
-                    paddingTop: 4,
-                  }}
-                >
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    onClick={() => onJoinRoom(sessionList.roomID)}
-                  >
-                    Join room
-                  </Button>
+                <Box textAlign={"center"}>
+                  <Countdown date={timeCountDown}>
+                    <span></span>
+                  </Countdown>
                 </Box>
               </div>
-            </Box>
+            </Link>
           );
         })}
       </div>
+
+      {roomList?.length == 0 && (
+        <Typography textAlign={"center"} color="secondary ">
+          Not have room this time
+        </Typography>
+      )}
+
+      <ModalCreateRoom open={openCreate} toggle={toggleCreate} />
     </div>
   );
 };
 
-export default App;
+const DetailRoom = () => {
+  return <div>hello</div>;
+};
+
+export default Rooms;

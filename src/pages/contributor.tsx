@@ -35,7 +35,7 @@ const Contributor = () => {
   return (
     <div className="container">
       <div className="d-flex">
-        <button onClick={() => workerRef.current.postMessage([])}>Click</button>
+        <button>Click</button>
 
         <div className="box-contributor">
           <div className="box-vault-flex">

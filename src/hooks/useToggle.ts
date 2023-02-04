@@ -1,11 +1,13 @@
-import { useCallback, useState } from "react";
-// Hook
-// Parameter is the boolean, with default "false" value
-export const useToggle = (initialState: boolean = false): [boolean, any] => {
-  // Initialize the state
-  const [state, setState] = useState<boolean>(initialState);
-  // Define and memorize toggler function in case we pass down the comopnent,
-  // This function change the boolean value to it's opposite value
-  const toggle = useCallback((): void => setState((state) => !state), []);
-  return [state, toggle];
+import { useState } from "react";
+
+export const useToggle = (
+  initialState?: boolean
+): [boolean, () => void, () => void] => {
+  const [state, setState] = useState(initialState || false);
+
+  const toggle = () => setState(!state);
+
+  const onClose = () => setState(false);
+
+  return [state, toggle, onClose];
 };
