@@ -11,12 +11,51 @@ import { toast } from "react-hot-toast";
 export const useRoomService = (id?: number) => {
   const queryKey = "room-service";
   const { updateRoomList } = useStoreDataRoom();
-
+  const { refetch: fetchMyRoom } = useRoomMyService();
   const { refetch, data, isLoading } = useQuery({
     queryKey: [queryKey],
     queryFn: async () => {
       let data = await zkApi.getRoom();
       updateRoomList(data);
+      return data;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 10000,
+  });
+
+  const create = useMutation({
+    mutationKey: [queryKey + "create"],
+    mutationFn: async (payload) => {
+      const data = await zkApi.createRoom(payload);
+      return data;
+    },
+    onSuccess: (_data) => {
+      toast.success(`Create room ${_data.id} successfully`);
+      refetch();
+      fetchMyRoom();
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Error");
+    },
+  });
+
+  return {
+    create,
+    refetch,
+    data,
+    isLoading,
+  };
+};
+
+export const useRoomMyService = (id?: number) => {
+  const queryKey = "my-room-service";
+  const { updateMyRoom } = useStoreDataRoom();
+
+  const { refetch, data, isLoading } = useQuery({
+    queryKey: [queryKey],
+    queryFn: async () => {
+      let data = await zkApi.getMyRoom();
+      updateMyRoom(data);
       return data;
     },
     refetchOnWindowFocus: false,

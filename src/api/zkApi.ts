@@ -81,6 +81,12 @@ export const zkApi = {
     const res = await axiosInstance.post("/room/close", payload);
     return res;
   },
+
+  async cancelRoom(payload: { room_id: number }): Promise<any> {
+    const res = await axiosInstance.post("/room/cancel", payload);
+    return res;
+  },
+
   async updateDuration(payload: {
     room_id: number;
     duration_time: number;

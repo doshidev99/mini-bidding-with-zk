@@ -26,6 +26,8 @@ export interface IStorageData {
 
   roomList: any[];
   updateRoomList: (roomList: any[]) => void;
+  myRoom: any[];
+  updateMyRoom: (roomList: any[]) => void;
 }
 
 const initialValues = {
@@ -35,6 +37,7 @@ const initialValues = {
   bid_data: "",
   currentRoom: null,
   roomList: [],
+  myRoom: [],
 };
 
 export const useStoreDataRoom = create<IStorageData & {}>()((set) => ({
@@ -52,5 +55,10 @@ export const useStoreDataRoom = create<IStorageData & {}>()((set) => ({
   updateRoomList: (roomList: any[]) =>
     set({
       roomList,
+    }),
+
+  updateMyRoom: (myRoom: any[]) =>
+    set({
+      myRoom,
     }),
 }));

@@ -5,6 +5,7 @@ import ModalJoinRoom, {
   ModalBidding,
 } from "@components/AppModal/ModalJoinRoom";
 import OpenRoom from "@components/AppModal/OpenRoom";
+import CancelRoom from "@components/AppModal/CancelRoom";
 import UpdateDuration from "@components/AppModal/UpdateDuration";
 import { useStoreModal } from "@store/useStoreModal";
 
@@ -28,6 +29,9 @@ const GlobalModal = () => {
     toggleOpenJoinRoom,
     isOpenBidding,
     toggleOpenBidding,
+
+    isCancelRoom,
+    toggleCancelRoom,
   } = useStoreModal();
   return (
     <div>
@@ -44,6 +48,7 @@ const GlobalModal = () => {
 
       <OpenRoom open={isOpenRoom} toggle={toggleOpenRoom} />
       <CloseRoom open={isCloseRoom} toggle={toggleCloseRoom} />
+      <CancelRoom open={isCancelRoom} toggle={toggleCancelRoom} />
       <ModalJoinRoom open={isOpenJoinRoom} toggle={toggleOpenJoinRoom} />
       <ModalBidding open={isOpenBidding} toggle={toggleOpenBidding} />
       {/* <ModalUserJoinRoom open={openJoinRoom} toggle={toggleJoinRoom} /> */}

@@ -1,5 +1,4 @@
 import { zkApi } from "@api/zkApi";
-import BamInput from "@components/Form/BamInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
@@ -10,44 +9,34 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as yup from "yup";
 
-const schema = yup.object().shape({
-  start_after: yup.number().required("start_after is required"),
-});
+const schema = yup.object().shape({});
 
-const OpenRoom = ({ open, toggle }) => {
+const CancelRoom = ({ open, toggle }) => {
   const { query } = useRouter();
-  const { refetch } = useDetailInRoom();
   const [isLoading, setIsLoading] = useState(false);
+  const { refetch } = useDetailInRoom();
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<{
-    start_after: number;
-  }>({
+  const { handleSubmit } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: {
-      start_after: 5,
-    },
+    defaultValues: {},
     mode: "onChange",
   });
 
   const onSubmit = async (formValues) => {
     try {
       setIsLoading(true);
-      await zkApi.openRoom({
-        start_after: formValues.start_after,
+
+      await zkApi.cancelRoom({
         room_id: +query.id,
       });
-      toast.success("Room opened successfully");
-      toggle();
+
+      toast.success("Room cancel successfully");
       refetch();
+      toggle();
     } catch (e) {
       toast.error(e.message);
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -55,30 +44,17 @@ const OpenRoom = ({ open, toggle }) => {
       <Modal open={open} onClose={toggle}>
         <Box sx={style}>
           <Typography textAlign={"center"} pb={2} variant="subtitle1">
-            Open room bidding
+            You are about to cancel this room. Are you sure?
           </Typography>
-
-          <BamInput
-            control={control}
-            name="start_after"
-            placeholder="Start after..."
-            label="Start after"
-            rules={{ required: true }}
-            error={errors.start_after}
-            autoFocus={true}
-          />
 
           <Box pt={2} textAlign="right">
             <Button
               variant="outlined"
               type="submit"
-              startIcon={
-                isLoading && <CircularProgress size={20} color="secondary" />
-              }
-              disabled={isLoading}
               onClick={handleSubmit(onSubmit)}
+              startIcon={isLoading && <CircularProgress size={20} />}
             >
-              <Typography>Submit</Typography>
+              <Typography>Yes</Typography>
             </Button>
           </Box>
         </Box>
@@ -101,4 +77,4 @@ const style = {
   p: 4,
 };
 
-export default OpenRoom;
+export default CancelRoom;

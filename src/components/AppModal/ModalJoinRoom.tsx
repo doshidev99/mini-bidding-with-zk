@@ -16,7 +16,7 @@ import { useStoreProfile } from "@store/useStoreProfile";
 import { LocalStorage } from "@utils/newLocalstorage";
 import { keyBy, keys } from "lodash-es";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as yup from "yup";
@@ -35,6 +35,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<{
     code: string;
@@ -47,6 +48,14 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
     },
     mode: "onChange",
   });
+
+  const emailByProfile = useMemo(() => {
+    if (profile) {
+      setValue("email", profile?.email);
+      return profile?.email;
+    }
+    return "";
+  }, [profile, setValue]);
 
   const room_id = roomId || (query?.id as string);
   const onSubmit = async (formValues) => {
@@ -61,7 +70,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
 
       updateProofId(proofId);
       const dataSaveToStorage = {
-        [profile. id + room_id]: {
+        [profile.id + room_id]: {
           proofId,
           payload,
         },
@@ -138,6 +147,8 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
               control={control}
               label="Email"
               name="email"
+              value={emailByProfile}
+              disabled
               placeholder="Enter your email"
               rules={{ required: true }}
               error={errors.email}
@@ -161,6 +172,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
                 }
                 variant="contained"
                 type="submit"
+                disabled={joining}
                 onClick={handleSubmit(onSubmit)}
               >
                 Join
@@ -216,7 +228,7 @@ export const ModalBidding = ({ open, toggle }) => {
     setIsBidding(true);
     try {
       const prevPayload = LocalStorage.get("proofInRoom");
-      const _dataJoinRoomByProfile = prevPayload[profile. id + query.id];
+      const _dataJoinRoomByProfile = prevPayload[profile.id + query.id];
       const bid_data = await zkApi.joinBidding({
         ..._dataJoinRoomByProfile.payload,
         bid_value: +formValues.bidValue,
@@ -271,6 +283,7 @@ export const ModalBidding = ({ open, toggle }) => {
               startIcon={
                 isBidding && <CircularProgress size={20} color="secondary" />
               }
+              disabled={isBidding}
               variant="contained"
               type="submit"
               onClick={handleSubmit(onBidding)}

@@ -85,6 +85,7 @@ const AppFormCreateRoom = ({ handleNext }) => {
             startIcon={
               isLoading && <CircularProgress size={20} color="secondary" />
             }
+            disabled={isLoading}
             variant="contained"
             type="submit"
             onClick={handleSubmit(onSubmit)}

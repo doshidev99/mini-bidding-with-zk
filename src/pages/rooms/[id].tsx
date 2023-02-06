@@ -1,5 +1,4 @@
 import ListUserBidding from "@components/ListUserBidding";
-import { useToggle } from "@hooks/useToggle";
 import { Box, Button, Skeleton, Typography } from "@mui/material";
 import { useDetailInRoom } from "@services/roomService";
 import { useStoreDataInRoom } from "@store/useStoreDataInRoom";
@@ -9,8 +8,6 @@ import Image from "next/image";
 import Countdown from "react-countdown";
 
 const RoomDetail = () => {
-  const [isOpen, onOpen] = useToggle();
-
   const { isLoading } = useDetailInRoom();
 
   const {
@@ -20,6 +17,7 @@ const RoomDetail = () => {
     toggleCloseRoom,
     toggleOpenJoinRoom,
     toggleOpenBidding,
+    toggleCancelRoom,
   } = useStoreModal();
   const { isLoadingDetailInRoom, currentRoom, isOwner } = useStoreDataInRoom();
 
@@ -168,6 +166,26 @@ const RoomDetail = () => {
               </Countdown>
             </Box>
           )}
+
+          {
+            <>
+              <Box>
+                {isOwner && currentRoom?.status != "cancel" && currentRoom?.status != "open" && (
+                  <Box pt={3} textAlign={"center"}>
+                    <Button
+                      sx={{
+                        minWidth: 170,
+                      }}
+                      variant="outlined"
+                      onClick={toggleCancelRoom}
+                    >
+                      Cancel room
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            </>
+          }
         </Box>
 
         <Box
