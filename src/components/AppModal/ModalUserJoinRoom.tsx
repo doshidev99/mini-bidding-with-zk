@@ -61,7 +61,7 @@ const ModalUserJoinRoom = ({ open, toggle }) => {
     try {
       const proofId = await zkApi.joinRoom(payload);
       const dataGuestSave = {
-        [profile.auth_user]: {
+        [profile. id]: {
           [formValues.roomId]: {
             proofId,
             payload,
@@ -181,7 +181,7 @@ export const ModalUserBidding = ({ open, toggle }) => {
       const _roomHasInvites = LocalStorage.get("dataGuestSave");
       if (!_roomHasInvites) return;
       const _dataJoinRoomByProfile =
-        _roomHasInvites[profile.auth_user]?.[query?.id as string];
+        _roomHasInvites[profile. id]?.[query?.id as string];
       const bid_data = await zkApi.joinBidding({
         ..._dataJoinRoomByProfile.payload,
         bid_value: +formValues.bidValue,

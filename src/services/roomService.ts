@@ -61,12 +61,14 @@ export const useDetailInRoom = () => {
       const roomId = query.id;
 
       const _dataViewRoom = await zkApi.getViewRoomById(+roomId);
-      const isOwner = _dataViewRoom.creator == profile.auth_user;
+      console.log("profile", profile);
+
+      const isOwner = _dataViewRoom.creator == profile.id;
       updateIsOwner(isOwner);
       if (!isOwner) {
         const proofStorage = LocalStorage.get("proofInRoom");
-        if (proofStorage && proofStorage[profile.auth_user + roomId]) {
-          const proofInRoom = proofStorage?.[profile.auth_user + roomId];
+        if (proofStorage && proofStorage[profile.id + roomId]) {
+          const proofInRoom = proofStorage?.[profile.id + roomId];
           const _dataRoomByProof = await zkApi.viewRoomWithProof({
             room_id: +roomId,
             inputs: proofInRoom.proofId.inputs,

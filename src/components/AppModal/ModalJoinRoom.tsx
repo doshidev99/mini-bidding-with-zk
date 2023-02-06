@@ -61,7 +61,7 @@ const ModalJoinRoom = ({ open, toggle, roomId }: any) => {
 
       updateProofId(proofId);
       const dataSaveToStorage = {
-        [profile.auth_user + room_id]: {
+        [profile. id + room_id]: {
           proofId,
           payload,
         },
@@ -216,7 +216,7 @@ export const ModalBidding = ({ open, toggle }) => {
     setIsBidding(true);
     try {
       const prevPayload = LocalStorage.get("proofInRoom");
-      const _dataJoinRoomByProfile = prevPayload[profile.auth_user + query.id];
+      const _dataJoinRoomByProfile = prevPayload[profile. id + query.id];
       const bid_data = await zkApi.joinBidding({
         ..._dataJoinRoomByProfile.payload,
         bid_value: +formValues.bidValue,
